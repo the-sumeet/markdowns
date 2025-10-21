@@ -6,8 +6,9 @@
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
+  "wailsjsdir": "./frontend/src/lib",
   "author": {
     "name": "sumeet",
-    "email": "Sumeet.Mathpati@steel-eye.com"
+    "email": "Sumeet.Mathpati@gmail.com"
   }
 }
