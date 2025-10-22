@@ -23,11 +23,12 @@
 </script>
 
 <div class="h-full ">
-  <div id="editor" class="h-full "></div>
+  <div id="editor" class="h-full rounded-xl"></div>
 </div>
 
 <style>
 	:global(.milkdown) {
+    border-radius: 12px;
     overflow-y: hidden;
 		height: 100% !important;
 		margin: 0px !important;
