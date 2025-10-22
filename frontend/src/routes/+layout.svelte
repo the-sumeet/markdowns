@@ -1,10 +1,10 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import AppSidebar from "$lib/components/app-sidebar.svelte";
-	import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
-	import { Separator } from "$lib/components/ui/separator/index.js";
-	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import AppSidebar from '$lib/components/app-sidebar.svelte';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import { Separator } from '$lib/components/ui/separator/index.js';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	let { children } = $props();
 </script>
 
@@ -12,10 +12,9 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-
-<Sidebar.Provider>
+<Sidebar.Provider class="h-screen">
 	<AppSidebar />
-	<Sidebar.Inset>
+	<Sidebar.Inset class="flex flex-col">
 		<header class="flex h-16 shrink-0 items-center gap-2">
 			<div class="flex items-center gap-2 px-4">
 				<Sidebar.Trigger class="-ml-1" />
@@ -33,11 +32,8 @@
 				</Breadcrumb.Root>
 			</div>
 		</header>
-		<div>
+		<div class="overflow-y-hidden max-h-full flex-1 p-2">
 			{@render children?.()}
-
 		</div>
 	</Sidebar.Inset>
 </Sidebar.Provider>
-
-
