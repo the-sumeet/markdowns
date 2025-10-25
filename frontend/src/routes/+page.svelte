@@ -2,15 +2,20 @@
 	import { Crepe } from '@milkdown/crepe';
 	import '@milkdown/crepe/theme/common/style.css';
 	import '@milkdown/crepe/theme/frame-dark.css';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, untrack } from 'svelte';
 	import { appState } from '../store.svelte';
-	import { GetFileContent } from '$lib/wailsjs/go/main/App';
+	import { GetFileContent, SaveFile } from '$lib/wailsjs/go/main/App';
 	import { editorViewCtx, parserCtx } from '@milkdown/core';
 	import { Slice } from '@milkdown/prose/model';
 
-	let content: string = $state('');
 	let crepe: Crepe | null = $state(null);
 	let editorReady = $state(false);
+	let isDirty = $state(false);
+	let currentFileBeingEdited: string | null = $state(null);
+	let saveTimeout: NodeJS.Timeout | null = null;
+	let lastSavedContent: string = '';
+	let changeCheckInterval: NodeJS.Timeout | null = null;
+		let previousFile: string | undefined = undefined;
 
 	// Function to set markdown content in the editor
 	function setEditorContent(markdown: string) {
@@ -34,17 +39,92 @@
 		}
 	}
 
+	// Function to save file
+	async function saveCurrentFile() {
+
+
+		if (!currentFileBeingEdited || !isDirty) return;
+
+
+		try {
+			const currentContent = crepe?.getMarkdown();
+			console.log('Saving file content:', currentContent);
+			if (currentContent !== undefined) {
+				await SaveFile(currentFileBeingEdited, currentContent);
+				console.log('File saved:', currentFileBeingEdited);
+				lastSavedContent = currentContent;
+				isDirty = false;
+			}
+		} catch (error) {
+			console.error('Error saving file:', error);
+		}
+	}
+
+	// Check for content changes periodically
+	function checkForChanges() {
+		if (!crepe || !editorReady || !currentFileBeingEdited) return;
+
+		const currentContent = crepe.getMarkdown();
+		// Only trigger if content changed AND not already dirty (avoid repeated triggers)
+		if (currentContent !== lastSavedContent && !isDirty) {
+			console.log('Content changed, marking as dirty');
+			isDirty = true;
+			scheduleAutoSave();
+		}
+	}
+
+	// Debounced auto-save (3 seconds)
+	function scheduleAutoSave() {
+		// Clear existing timeout
+		if (saveTimeout) {
+			clearTimeout(saveTimeout);
+		}
+
+		// Schedule new save after 3 seconds
+		saveTimeout = setTimeout(() => {
+			saveCurrentFile();
+		}, 3000);
+	}
+
 	// Watch for file changes and load content
 	$effect(() => {
-		if (appState.currentFile) {
-			GetFileContent(appState.currentFile).then((data) => {
-				content = data;
-				console.log('File content loaded:', content);
-				// Update editor content if editor is ready
-				setEditorContent(content);
+		const newFile = appState.currentFile;
+
+		// Only load if the file actually changed
+		if (newFile && newFile !== previousFile) {
+			// Use untrack to prevent isDirty from becoming a dependency
+			untrack(() => {
+				// Save current file before switching if it's dirty
+				if (isDirty && currentFileBeingEdited && currentFileBeingEdited !== newFile) {
+					saveCurrentFile().then(() => {
+						loadNewFile(newFile);
+						previousFile = newFile;
+					});
+				} else {
+					loadNewFile(newFile);
+					previousFile = newFile;
+				}
 			});
 		}
 	});
+
+	// Load new file content
+	async function loadNewFile(filePath: string | undefined) {
+		console.log('Loading file:', filePath); 
+		if (!filePath) return;
+
+		try {
+			const data = await GetFileContent(filePath);
+			lastSavedContent = data;
+			currentFileBeingEdited = filePath;
+			isDirty = false;
+			console.log('File content loaded:', data);
+			// Update editor content if editor is ready
+			setEditorContent(data);
+		} catch (error) {
+			console.error('Error loading file:', error);
+		}
+	}
 
 	onMount(() => {
 		// Create editor instance
@@ -55,14 +135,26 @@
 
 		crepe.create().then(() => {
 			editorReady = true;
-			// Set initial content if available
-			if (content) {
-				setEditorContent(content);
-			}
+
+			// Start polling for changes every 500ms
+			changeCheckInterval = setInterval(checkForChanges, 500);
 		});
 	});
 
 	onDestroy(() => {
+		// Save before destroying if dirty
+		if (isDirty && currentFileBeingEdited) {
+			saveCurrentFile();
+		}
+
+		// Clear intervals and timeouts
+		if (saveTimeout) {
+			clearTimeout(saveTimeout);
+		}
+		if (changeCheckInterval) {
+			clearInterval(changeCheckInterval);
+		}
+
 		// Clean up when component is destroyed
 		editorReady = false;
 		crepe?.destroy();

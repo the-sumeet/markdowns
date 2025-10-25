@@ -219,3 +219,34 @@ func (a *App) RenameFile(oldPath string, newName string) error {
 
 	return nil
 }
+
+// SaveFile saves content to the specified file
+func (a *App) SaveFile(path string, content string) error {
+	if path == "" {
+		return fmt.Errorf("file path cannot be empty")
+	}
+
+	// Check if file exists
+	info, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("failed to get file info for %s: %w", path, err)
+	}
+
+	// Don't allow saving to directories
+	if info.IsDir() {
+		return fmt.Errorf("path %s is a directory, not a file", path)
+	}
+
+	// Write content to file
+	err = os.WriteFile(path, []byte(content), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to save file %s: %w", path, err)
+	}
+
+	// Update current file content cache
+	if a.currentFile == path {
+		a.currentFileContent = content
+	}
+
+	return nil
+}
