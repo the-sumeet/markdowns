@@ -15,7 +15,10 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import CommandIcon from '@lucide/svelte/icons/command';
 	import { type ComponentProps } from 'svelte';
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import FilePlus from '@lucide/svelte/icons/file-plus';
 
+	import { Button } from '$lib/components/ui/button/index.js';
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 
 	const data = {
@@ -141,8 +144,6 @@
 			}
 		]
 	};
-
-	
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>
@@ -169,10 +170,18 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<!-- <NavMain items={data.navMain} /> -->
-		<NavFiles  />
+		<NavFiles />
 		<!-- <NavSecondary items={data.navSecondary} class="mt-auto" /> -->
 	</Sidebar.Content>
 	<Sidebar.Footer>
+		<div class="flex gap-2">
+			<Button variant="secondary" size="icon" class="size-8">
+				<FilePlus />
+			</Button>
+			<Button variant="secondary" size="icon" class="size-8">
+				<ChevronRightIcon />
+			</Button>
+		</div>
 		<NavUser user={data.user} />
 	</Sidebar.Footer>
 </Sidebar.Root>
