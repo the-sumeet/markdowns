@@ -25,7 +25,6 @@ type CurrentFilesState struct {
 
 // ListFiles lists files and folders in the given path
 func (a *App) ListFiles(path string) ([]FileEntry, error) {
-	fmt.Println("listing", path)
 	dirPath := path
 	if dirPath == "" {
 		dirPath = a.currentDir
@@ -137,4 +136,86 @@ func (a *App) GetCurrentFilesState() CurrentFilesState {
 		CurrentDir:  a.currentDir,
 		CurrentFile: a.currentFile,
 	}
+}
+
+// CreateFile creates a new file with the given name in the current directory
+func (a *App) CreateFile(name string) error {
+	if name == "" {
+		return fmt.Errorf("file name cannot be empty")
+	}
+
+	filePath := filepath.Join(a.currentDir, name)
+
+	// Check if file already exists
+	if _, err := os.Stat(filePath); err == nil {
+		return fmt.Errorf("file %s already exists", name)
+	}
+
+	// Create the file
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create file %s: %w", name, err)
+	}
+	defer file.Close()
+
+	return nil
+}
+
+// CreateDir creates a new directory with the given name in the current directory
+func (a *App) CreateDir(name string) error {
+	if name == "" {
+		return fmt.Errorf("directory name cannot be empty")
+	}
+
+	dirPath := filepath.Join(a.currentDir, name)
+
+	// Check if directory already exists
+	if _, err := os.Stat(dirPath); err == nil {
+		return fmt.Errorf("directory %s already exists", name)
+	}
+
+	// Create the directory
+	err := os.Mkdir(dirPath, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", name, err)
+	}
+
+	return nil
+}
+
+// RenameFile renames a file or directory
+func (a *App) RenameFile(oldPath string, newName string) error {
+	if newName == "" {
+		return fmt.Errorf("new name cannot be empty")
+	}
+
+	// Check if old path exists
+	info, err := os.Stat(oldPath)
+	if err != nil {
+		return fmt.Errorf("failed to get file info for %s: %w", oldPath, err)
+	}
+
+	// Build the new path (same directory, new name)
+	dir := filepath.Dir(oldPath)
+	newPath := filepath.Join(dir, newName)
+
+	// Check if new path already exists
+	if _, err := os.Stat(newPath); err == nil {
+		return fmt.Errorf("a file or directory named %s already exists", newName)
+	}
+
+	// Rename the file/directory
+	err = os.Rename(oldPath, newPath)
+	if err != nil {
+		return fmt.Errorf("failed to rename %s to %s: %w", oldPath, newName, err)
+	}
+
+	// Update current file/dir state if necessary
+	if info.IsDir() && a.currentDir == oldPath {
+		a.currentDir = newPath
+	} else if !info.IsDir() && a.currentFile == oldPath {
+		a.currentFile = newPath
+	}
+
+	return nil
 }

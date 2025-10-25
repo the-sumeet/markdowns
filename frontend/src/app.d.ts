@@ -14,6 +14,7 @@ declare global {
 		interface AppState {
 			currentFile?: string
 			currentDir?: string
+			refreshTrigger?: number
 		}
 	}
 }

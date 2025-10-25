@@ -1,3 +1,5 @@
 
 
-export const appState: App.AppState = $state({})
+export const appState: App.AppState = $state({
+	refreshTrigger: 0
+})
