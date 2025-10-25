@@ -39,13 +39,13 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class OpenFileResponse {
+	export class CurrentFilesState {
 	    currentDir: string;
 	    currentFile: string;
 	    fileInfo?: FileEntry;
 	
 	    static createFrom(source: any = {}) {
-	        return new OpenFileResponse(source);
+	        return new CurrentFilesState(source);
 	    }
 	
 	    constructor(source: any = {}) {

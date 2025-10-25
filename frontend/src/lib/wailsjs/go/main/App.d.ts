@@ -4,10 +4,12 @@ import {main} from '../models';
 
 export function DeleteFile(arg1:string):Promise<void>;
 
-export function GetCurrentState():Promise<string>;
+export function GetCurrentFilesState():Promise<main.CurrentFilesState>;
+
+export function GetFileContent(arg1:string):Promise<string>;
 
 export function Greet(arg1:string):Promise<string>;
 
 export function ListFiles(arg1:string):Promise<Array<main.FileEntry>>;
 
-export function OpenFile(arg1:string):Promise<main.OpenFileResponse>;
+export function OpenFile(arg1:string):Promise<main.CurrentFilesState>;

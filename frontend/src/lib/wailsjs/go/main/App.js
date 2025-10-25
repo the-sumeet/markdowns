@@ -6,8 +6,12 @@ export function DeleteFile(arg1) {
   return window['go']['main']['App']['DeleteFile'](arg1);
 }
 
-export function GetCurrentState() {
-  return window['go']['main']['App']['GetCurrentState']();
+export function GetCurrentFilesState() {
+  return window['go']['main']['App']['GetCurrentFilesState']();
+}
+
+export function GetFileContent(arg1) {
+  return window['go']['main']['App']['GetFileContent'](arg1);
 }
 
 export function Greet(arg1) {

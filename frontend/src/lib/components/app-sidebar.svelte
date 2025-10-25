@@ -1,4 +1,4 @@
-<script lang="ts" >
+<script lang="ts">
 	import BookOpenIcon from '@lucide/svelte/icons/book-open';
 	import BotIcon from '@lucide/svelte/icons/bot';
 	import ChartPieIcon from '@lucide/svelte/icons/chart-pie';
@@ -14,9 +14,7 @@
 	import NavUser from './nav-user.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import CommandIcon from '@lucide/svelte/icons/command';
-	import { onMount, type ComponentProps } from 'svelte';
-	import { Greet, ListFiles } from '../wailsjs/go/main/App';
-	import type { main } from '$lib/wailsjs/go/models';
+	import { type ComponentProps } from 'svelte';
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 
@@ -144,14 +142,7 @@
 		]
 	};
 
-	let files: main.FileEntry[] = $state([])
-
-	onMount(() => {
-		ListFiles('').then((res) => {
-			files = res;
-		}).catch((e) => {
-		})
-	})
+	
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>
@@ -177,9 +168,9 @@
 		</Sidebar.Menu>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavMain items={data.navMain} />
-		<NavFiles {files} />
-		<NavSecondary items={data.navSecondary} class="mt-auto" />
+		<!-- <NavMain items={data.navMain} /> -->
+		<NavFiles  />
+		<!-- <NavSecondary items={data.navSecondary} class="mt-auto" /> -->
 	</Sidebar.Content>
 	<Sidebar.Footer>
 		<NavUser user={data.user} />

@@ -5,7 +5,20 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { onMount } from 'svelte';
+	import { GetCurrentFilesState } from "$lib/wailsjs/go/main/App";
+	import { appState } from '../store.svelte';
+	import type { main } from '$lib/wailsjs/go/models';
+
 	let { children } = $props();
+
+	onMount(() => {
+
+		GetCurrentFilesState().then((res: main.CurrentFilesState) => {
+			appState.currentDir = res.currentDir;
+			appState.currentFile = res.currentFile;
+		})
+	})
 </script>
 
 <svelte:head>

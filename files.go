@@ -17,7 +17,7 @@ type FileEntry struct {
 }
 
 // OpenFileResponse represents the state after opening a file or directory
-type OpenFileResponse struct {
+type CurrentFilesState struct {
 	CurrentDir  string     `json:"currentDir"`
 	CurrentFile string     `json:"currentFile"`
 	FileInfo    *FileEntry `json:"fileInfo,omitempty"`
@@ -25,13 +25,15 @@ type OpenFileResponse struct {
 
 // ListFiles lists files and folders in the given path
 func (a *App) ListFiles(path string) ([]FileEntry, error) {
-
+	fmt.Println("listing", path)
 	dirPath := path
 	if dirPath == "" {
 		dirPath = a.currentDir
 	}
 
 	entries, err := os.ReadDir(dirPath)
+	fmt.Println(entries)
+	fmt.Println("===")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read directory %s: %w", dirPath, err)
 	}
@@ -56,7 +58,7 @@ func (a *App) ListFiles(path string) ([]FileEntry, error) {
 }
 
 // OpenFile opens a file or changes the current directory
-func (a *App) OpenFile(path string) (*OpenFileResponse, error) {
+func (a *App) OpenFile(path string) (*CurrentFilesState, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get file info for %s: %w", path, err)
@@ -69,7 +71,7 @@ func (a *App) OpenFile(path string) (*OpenFileResponse, error) {
 
 	}
 
-	return &OpenFileResponse{
+	return &CurrentFilesState{
 		CurrentDir:  a.currentDir,
 		CurrentFile: a.currentFile,
 		FileInfo: &FileEntry{
@@ -109,12 +111,30 @@ func (a *App) DeleteFile(path string) error {
 	return nil
 }
 
+// GetFileContent reads and returns the content of the specified file
+func (a *App) GetFileContent(path string) (string, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to get file info for %s: %w", path, err)
+	}
+
+	if info.IsDir() {
+		return "", fmt.Errorf("path %s is a directory, not a file", path)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file %s: %w", path, err)
+	}
+
+	return string(content), nil
+}
+
 // GetCurrentState returns the current directory, file, and its content,
 // along with the file list of the current directory.
-func (a *App) GetCurrentState() (string, string, string, []FileEntry, error) {
-	files, err := a.ListFiles(a.currentDir)
-	if err != nil {
-		return "", "", "", nil, fmt.Errorf("failed to list files for current directory: %w", err)
+func (a *App) GetCurrentFilesState() CurrentFilesState {
+	return CurrentFilesState{
+		CurrentDir:  a.currentDir,
+		CurrentFile: a.currentFile,
 	}
-	return a.currentDir, a.currentFile, a.currentFileContent, files, nil
 }
