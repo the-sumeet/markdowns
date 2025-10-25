@@ -1,24 +1,71 @@
-<script>
+<script lang="ts">
 	import { Crepe } from '@milkdown/crepe';
 	import '@milkdown/crepe/theme/common/style.css';
 	import '@milkdown/crepe/theme/frame-dark.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { appState } from '../store.svelte';
+	import { GetFileContent } from '$lib/wailsjs/go/main/App';
+	import { editorViewCtx, parserCtx } from '@milkdown/core';
+	import { Slice } from '@milkdown/prose/model';
 
-	// Choose your preferred theme
+	let content: string = $state('');
+	let crepe: Crepe | null = $state(null);
+	let editorReady = $state(false);
 
-	// Initialize the editor
+	// Function to set markdown content in the editor
+	function setEditorContent(markdown: string) {
+		if (!crepe || !editorReady) return;
 
-	// Clean up when done
-	// crepe.destroy();
+		try {
+			crepe.editor.action((ctx) => {
+				const view = ctx.get(editorViewCtx);
+				const parser = ctx.get(parserCtx);
+				const doc = parser(markdown);
+
+				if (!doc) return;
+
+				const state = view.state;
+				view.dispatch(
+					state.tr.replace(0, state.doc.content.size, new Slice(doc.content, 0, 0))
+				);
+			});
+		} catch (error) {
+			console.error('Error setting editor content:', error);
+		}
+	}
+
+	// Watch for file changes and load content
+	$effect(() => {
+		if (appState.currentFile) {
+			GetFileContent(appState.currentFile).then((data) => {
+				content = data;
+				console.log('File content loaded:', content);
+				// Update editor content if editor is ready
+				setEditorContent(content);
+			});
+		}
+	});
 
 	onMount(() => {
 		// Create editor instance
-		const crepe = new Crepe({
+		crepe = new Crepe({
 			root: document.getElementById('editor'),
 			defaultValue: '# Hello, Crepe!\n\nStart writing your markdown...'
 		});
 
-		crepe.create();
+		crepe.create().then(() => {
+			editorReady = true;
+			// Set initial content if available
+			if (content) {
+				setEditorContent(content);
+			}
+		});
+	});
+
+	onDestroy(() => {
+		// Clean up when component is destroyed
+		editorReady = false;
+		crepe?.destroy();
 	});
 </script>
 
