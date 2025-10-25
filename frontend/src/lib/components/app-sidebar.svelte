@@ -188,7 +188,7 @@
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>
-	<Sidebar.Header>
+	<!-- <Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton size="lg">
@@ -208,7 +208,7 @@
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
-	</Sidebar.Header>
+	</Sidebar.Header> -->
 	<Sidebar.Content>
 		<!-- <NavMain items={data.navMain} /> -->
 		<NavFiles />
