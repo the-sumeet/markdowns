@@ -17,6 +17,7 @@
 	import { type ComponentProps } from 'svelte';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import FilePlus from '@lucide/svelte/icons/file-plus';
+	import FolderPlus from '@lucide/svelte/icons/folder-plus';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
@@ -173,15 +174,15 @@
 		<NavFiles />
 		<!-- <NavSecondary items={data.navSecondary} class="mt-auto" /> -->
 	</Sidebar.Content>
-	<Sidebar.Footer>
-		<div class="flex gap-2">
-			<Button variant="secondary" size="icon" class="size-8">
+	<Sidebar.Footer class="border-t">
+		<div class="flex gap-2 w-full justify-end">
+			<Button variant="outline" size="icon" class="size-8">
 				<FilePlus />
 			</Button>
-			<Button variant="secondary" size="icon" class="size-8">
-				<ChevronRightIcon />
+			<Button variant="outline" size="icon" class="size-8">
+				<FolderPlus />
 			</Button>
 		</div>
-		<NavUser user={data.user} />
+		<!-- <NavUser user={data.user} /> -->
 	</Sidebar.Footer>
 </Sidebar.Root>
