@@ -16,6 +16,8 @@
 	let lastSavedContent: string = '';
 	let changeCheckInterval: NodeJS.Timeout | null = null;
 	let previousFile: string | undefined = undefined;
+	let isSaving = $state(false);
+	let isLoading = $state(false);
 
 	// Function to set markdown content in the editor
 	function setEditorContent(markdown: string) {
@@ -41,18 +43,34 @@
 
 	// Function to save file
 	async function saveCurrentFile() {
-		if (!currentFileBeingEdited || !isDirty) return;
+		// Prevent concurrent saves
+		if (isSaving || !currentFileBeingEdited || !isDirty) return;
 
+		isSaving = true;
 		try {
 			const currentContent = crepe?.getMarkdown();
-			if (currentContent !== undefined) {
-				await SaveFile(currentFileBeingEdited, currentContent);
-				console.log('File saved:', currentFileBeingEdited);
-				lastSavedContent = currentContent;
-				isDirty = false;
+
+			// CRITICAL: Never save if content is undefined or editor not ready
+			if (currentContent === undefined || !editorReady) {
+				console.error('Cannot save: editor not ready or content undefined');
+				return;
 			}
+
+			// CRITICAL: Validate content before saving
+			// Only allow empty save if lastSavedContent was also empty (new file scenario)
+			if (currentContent.trim() === '' && lastSavedContent.trim() !== '') {
+				console.error('PREVENTED DATA LOSS: Attempted to save empty content when file had data');
+				return;
+			}
+
+			await SaveFile(currentFileBeingEdited, currentContent);
+			console.log('File saved:', currentFileBeingEdited);
+			lastSavedContent = currentContent;
+			isDirty = false;
 		} catch (error) {
 			console.error('Error saving file:', error);
+		} finally {
+			isSaving = false;
 		}
 	}
 
@@ -86,19 +104,20 @@
 	$effect(() => {
 		const newFile = appState.currentFile;
 
-		// Only load if the file actually changed
-		if (newFile && newFile !== previousFile) {
+		// Only load if the file actually changed and not currently loading
+		if (newFile && newFile !== previousFile && !isLoading) {
+			// Update previousFile immediately to prevent race conditions
+			previousFile = newFile;
+
 			// Use untrack to prevent isDirty from becoming a dependency
 			untrack(() => {
 				// Save current file before switching if it's dirty
 				if (isDirty && currentFileBeingEdited && currentFileBeingEdited !== newFile) {
 					saveCurrentFile().then(() => {
 						loadNewFile(newFile);
-						previousFile = newFile;
 					});
 				} else {
 					loadNewFile(newFile);
-					previousFile = newFile;
 				}
 			});
 		}
@@ -107,18 +126,30 @@
 	// Load new file content
 	async function loadNewFile(filePath: string | undefined) {
 		console.log('Loading file:', filePath);
-		if (!filePath) return;
+		if (!filePath || isLoading) return;
 
+		isLoading = true;
 		try {
 			const data = await GetFileContent(filePath);
+
+			// CRITICAL: Only update state AFTER successfully loading AND setting content
+			if (!editorReady) {
+				console.error('Cannot load file: editor not ready');
+				return;
+			}
+
+			// Set editor content first
+			setEditorContent(data);
+
+			// Only update state after successful content load
 			lastSavedContent = data;
 			currentFileBeingEdited = filePath;
 			isDirty = false;
-			console.log('File content loaded');
-			// Update editor content if editor is ready
-			setEditorContent(data);
+			console.log('File content loaded successfully');
 		} catch (error) {
 			console.error('Error loading file:', error);
+		} finally {
+			isLoading = false;
 		}
 	}
 
