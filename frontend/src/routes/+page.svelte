@@ -15,7 +15,7 @@
 	let saveTimeout: NodeJS.Timeout | null = null;
 	let lastSavedContent: string = '';
 	let changeCheckInterval: NodeJS.Timeout | null = null;
-		let previousFile: string | undefined = undefined;
+	let previousFile: string | undefined = undefined;
 
 	// Function to set markdown content in the editor
 	function setEditorContent(markdown: string) {
@@ -41,14 +41,10 @@
 
 	// Function to save file
 	async function saveCurrentFile() {
-
-
 		if (!currentFileBeingEdited || !isDirty) return;
-
 
 		try {
 			const currentContent = crepe?.getMarkdown();
-			console.log('Saving file content:', currentContent);
 			if (currentContent !== undefined) {
 				await SaveFile(currentFileBeingEdited, currentContent);
 				console.log('File saved:', currentFileBeingEdited);
@@ -110,7 +106,7 @@
 
 	// Load new file content
 	async function loadNewFile(filePath: string | undefined) {
-		console.log('Loading file:', filePath); 
+		console.log('Loading file:', filePath);
 		if (!filePath) return;
 
 		try {
@@ -118,7 +114,7 @@
 			lastSavedContent = data;
 			currentFileBeingEdited = filePath;
 			isDirty = false;
-			console.log('File content loaded:', data);
+			console.log('File content loaded');
 			// Update editor content if editor is ready
 			setEditorContent(data);
 		} catch (error) {
@@ -126,11 +122,38 @@
 		}
 	}
 
+	// Convert File to base64 data URI
+	function fileToBase64(file: File): Promise<string> {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = () => resolve(reader.result?.toString() || '');
+			reader.onerror = (error) => reject(error);
+		});
+	}
+
 	onMount(() => {
-		// Create editor instance
+		// Create editor instance with base64 uploader
 		crepe = new Crepe({
 			root: document.getElementById('editor'),
-			defaultValue: '# Hello, Crepe!\n\nStart writing your markdown...'
+			defaultValue: '# Hello, Crepe!\n\nStart writing your markdown...',
+			featureConfigs: {
+				'image-block': {
+					async blockOnUpload(file: File) {
+						console.log('Converting image to base64...');
+
+						try {
+							// Convert file to base64 data URI
+							const base64DataUri = await fileToBase64(file);
+							console.log('Image converted to base64');
+							return base64DataUri;
+						} catch (error) {
+							console.error('Error converting image to base64:', error);
+							return '';
+						}
+					}
+				}
+			}
 		});
 
 		crepe.create().then(() => {

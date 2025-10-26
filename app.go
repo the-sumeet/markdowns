@@ -10,11 +10,10 @@ import (
 type App struct {
 	ctx context.Context
 
-	currentDir        string
-	currentFile       string
+	currentDir         string
+	currentFile        string
 	currentFileContent string
 }
-
 
 // NewApp creates a new App application struct
 func NewApp() *App {
@@ -38,4 +37,3 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
-
