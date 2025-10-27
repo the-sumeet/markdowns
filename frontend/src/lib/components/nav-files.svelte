@@ -9,7 +9,14 @@
 	import Folder from '@lucide/svelte/icons/folder';
 	import File from '@lucide/svelte/icons/file';
 	import SquareArrowDown from '@lucide/svelte/icons/square-arrow-down';
-	import { OpenFile, ListFiles, DeleteFile, RenameFile, UpdateWindowTitleWithCurrentDir, GoUp } from '$lib/wailsjs/go/main/App';
+	import {
+		OpenFile,
+		ListFiles,
+		DeleteFile,
+		RenameFile,
+		UpdateWindowTitleWithCurrentDir,
+		GoUp
+	} from '$lib/wailsjs/go/main/App';
 	import { onMount } from 'svelte';
 	import type { main } from '$lib/wailsjs/go/models';
 	import { appState } from '../../store.svelte';
@@ -215,7 +222,7 @@
 			<Dialog.Description>
 				Are you sure you want to delete "{selectedFile?.name}"?
 				{#if selectedFile?.isDirectory}
-					<span class="block mt-2 text-red-500 font-medium">
+					<span class="mt-2 block font-medium text-red-500">
 						Warning: This will delete the directory and all its contents.
 					</span>
 				{/if}

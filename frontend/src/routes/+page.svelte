@@ -13,21 +13,18 @@
 	import { editorViewCtx, parserCtx } from '@milkdown/core';
 	import { Slice } from '@milkdown/prose/model';
 	import { fileToBase64 } from '$lib/utils';
-	import { main } from '$lib/wailsjs/go/models';
 
 	let crepe: Crepe | null = $state(null);
 	let editorReady = $state(false);
 	let readingNewFile = $state(false);
 	let saving = $state(false);
 
-	$inspect(appState);
-
 	$effect(() => {
 		if (appState.currentFile && editorReady) {
 			// New file should not be selected unless we're done with the content of the
 			// current markdown content.
 			readingNewFile = true;
-			GetFileContent(appState.currentFile)
+			GetFileContent(appState.currentFile.path)
 				.then((data) => {
 					setEditorContent(data);
 					appState.staleContent = false;
@@ -68,7 +65,7 @@
 
 		saving = true;
 
-		SaveFile(appState.currentFile, currentContent)
+		SaveFile(appState.currentFile.path, currentContent)
 			.then(async () => {
 				// Update content hash after saving
 				const newState = await GetCurrentFilesState();
@@ -85,6 +82,9 @@
 	}
 
 	onMount(() => {
+		// Make save function available to layout
+		appState.saveFile = saveContentToFile;
+
 		// Create editor instance with base64 uploader
 		crepe = new Crepe({
 			root: document.getElementById('editor'),
@@ -114,6 +114,8 @@
 				if (markdown !== prevMarkdown) {
 					GetContentHash(markdown).then((hash) => {
 						console.log('Content hash updated:', hash);
+						console.log('old markdown:', prevMarkdown);
+						console.log('new markdown:', markdown);
 						if (appState.contentHash !== hash) {
 							appState.staleContent = true;
 						} else {
@@ -133,6 +135,7 @@
 		// Clean up when component is destroyed
 		editorReady = false;
 		crepe?.destroy();
+		appState.saveFile = undefined;
 	});
 </script>
 

@@ -37,7 +37,7 @@
 				</div>
 				<div class="flex">
 					{#if appState.staleContent}
-					<Button>Save</Button>
+					<Button onclick={() => appState.saveFile?.()}>Save</Button>
 					{/if}
 				</div>
 				<!-- <Breadcrumb.Root>

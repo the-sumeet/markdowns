@@ -34,8 +34,6 @@ func (a *App) ListFiles(path string) ([]FileEntry, error) {
 	}
 
 	entries, err := os.ReadDir(dirPath)
-	fmt.Println(entries)
-	fmt.Println("===")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read directory %s: %w", dirPath, err)
 	}
@@ -60,10 +58,11 @@ func (a *App) ListFiles(path string) ([]FileEntry, error) {
 }
 
 // OpenFile opens a file or changes the current directory
-func (a *App) OpenFile(path string) (*CurrentFilesState, error) {
+func (a *App) OpenFile(path string) (CurrentFilesState, error) {
+
 	info, err := os.Stat(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get file info for %s: %w", path, err)
+		return CurrentFilesState{}, fmt.Errorf("failed to get file info for %s: %w", path, err)
 	}
 
 	if info.IsDir() {
@@ -74,45 +73,7 @@ func (a *App) OpenFile(path string) (*CurrentFilesState, error) {
 		a.currentFile = path
 	}
 
-	state := &CurrentFilesState{
-		FileInfo: &FileEntry{
-			Name:        info.Name(),
-			Path:        path,
-			IsDirectory: info.IsDir(),
-			Size:        info.Size(),
-			ModTime:     info.ModTime(),
-		},
-	}
-
-	// Populate CurrentDir
-	if a.currentDir != "" {
-		dirInfo, err := os.Stat(a.currentDir)
-		if err == nil {
-			state.CurrentDir = &FileEntry{
-				Name:        filepath.Base(a.currentDir),
-				Path:        a.currentDir,
-				IsDirectory: true,
-				Size:        dirInfo.Size(),
-				ModTime:     dirInfo.ModTime(),
-			}
-		}
-	}
-
-	// Populate CurrentFile
-	if a.currentFile != "" {
-		fileInfo, err := os.Stat(a.currentFile)
-		if err == nil {
-			state.CurrentFile = &FileEntry{
-				Name:        filepath.Base(a.currentFile),
-				Path:        a.currentFile,
-				IsDirectory: false,
-				Size:        fileInfo.Size(),
-				ModTime:     fileInfo.ModTime(),
-			}
-		}
-	}
-
-	return state, nil
+	return a.GetCurrentFilesState(), nil
 }
 
 // GoUp navigates one directory up from the current directory
@@ -216,6 +177,8 @@ func (a *App) GetFileContent(path string) (string, error) {
 func (a *App) GetContentHash(content string) string {
 	// Use SHA-256 for fast hashing with low collision chance
 	hash := sha256.Sum256([]byte(content))
+	fmt.Println("Content to hash:", content)
+	fmt.Println("Calculated content hash:", hex.EncodeToString(hash[:]))
 	return hex.EncodeToString(hash[:])
 }
 

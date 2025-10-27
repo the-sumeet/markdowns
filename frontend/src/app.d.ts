@@ -17,6 +17,7 @@ declare global {
 			currentDir?: main.FileEntry
 			refreshTrigger?: number
 			staleContent?: boolean
+			saveFile?: () => void
 		}
 	}
 }
