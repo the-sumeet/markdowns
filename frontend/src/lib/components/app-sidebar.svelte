@@ -8,14 +8,9 @@
 	import SendIcon from '@lucide/svelte/icons/send';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import SquareTerminalIcon from '@lucide/svelte/icons/square-terminal';
-	import NavMain from './nav-main.svelte';
 	import NavFiles from './nav-files.svelte';
-	import NavSecondary from './nav-secondary.svelte';
-	import NavUser from './nav-user.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import CommandIcon from '@lucide/svelte/icons/command';
 	import { type ComponentProps } from 'svelte';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import FilePlus from '@lucide/svelte/icons/file-plus';
 	import FolderPlus from '@lucide/svelte/icons/folder-plus';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';

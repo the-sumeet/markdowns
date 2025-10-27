@@ -40,8 +40,8 @@ export namespace main {
 		}
 	}
 	export class CurrentFilesState {
-	    currentDir: string;
-	    currentFile: string;
+	    currentDir?: FileEntry;
+	    currentFile?: FileEntry;
 	    fileInfo?: FileEntry;
 	    contentHash?: string;
 	
@@ -51,8 +51,8 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.currentDir = source["currentDir"];
-	        this.currentFile = source["currentFile"];
+	        this.currentDir = this.convertValues(source["currentDir"], FileEntry);
+	        this.currentFile = this.convertValues(source["currentFile"], FileEntry);
 	        this.fileInfo = this.convertValues(source["fileInfo"], FileEntry);
 	        this.contentHash = source["contentHash"];
 	    }

@@ -26,6 +26,10 @@ export function GetFileContent(arg1) {
   return window['go']['main']['App']['GetFileContent'](arg1);
 }
 
+export function GoUp() {
+  return window['go']['main']['App']['GoUp']();
+}
+
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }

@@ -20,8 +20,8 @@ type FileEntry struct {
 
 // OpenFileResponse represents the state after opening a file or directory
 type CurrentFilesState struct {
-	CurrentDir  string     `json:"currentDir"`
-	CurrentFile string     `json:"currentFile"`
+	CurrentDir  *FileEntry `json:"currentDir,omitempty"`
+	CurrentFile *FileEntry `json:"currentFile,omitempty"`
 	FileInfo    *FileEntry `json:"fileInfo,omitempty"`
 	ContentHash string     `json:"contentHash,omitempty"`
 }
@@ -74,17 +74,96 @@ func (a *App) OpenFile(path string) (*CurrentFilesState, error) {
 		a.currentFile = path
 	}
 
-	return &CurrentFilesState{
-		CurrentDir:  a.currentDir,
-		CurrentFile: a.currentFile,
+	state := &CurrentFilesState{
 		FileInfo: &FileEntry{
 			Name:        info.Name(),
 			Path:        path,
-			IsDirectory: false,
+			IsDirectory: info.IsDir(),
 			Size:        info.Size(),
 			ModTime:     info.ModTime(),
 		},
-	}, nil
+	}
+
+	// Populate CurrentDir
+	if a.currentDir != "" {
+		dirInfo, err := os.Stat(a.currentDir)
+		if err == nil {
+			state.CurrentDir = &FileEntry{
+				Name:        filepath.Base(a.currentDir),
+				Path:        a.currentDir,
+				IsDirectory: true,
+				Size:        dirInfo.Size(),
+				ModTime:     dirInfo.ModTime(),
+			}
+		}
+	}
+
+	// Populate CurrentFile
+	if a.currentFile != "" {
+		fileInfo, err := os.Stat(a.currentFile)
+		if err == nil {
+			state.CurrentFile = &FileEntry{
+				Name:        filepath.Base(a.currentFile),
+				Path:        a.currentFile,
+				IsDirectory: false,
+				Size:        fileInfo.Size(),
+				ModTime:     fileInfo.ModTime(),
+			}
+		}
+	}
+
+	return state, nil
+}
+
+// GoUp navigates one directory up from the current directory
+func (a *App) GoUp() (*CurrentFilesState, error) {
+	if a.currentDir == "" {
+		return nil, fmt.Errorf("no current directory set")
+	}
+
+	// Get the parent directory
+	parentDir := filepath.Dir(a.currentDir)
+
+	// Check if we're already at the root
+	if parentDir == a.currentDir {
+		return nil, fmt.Errorf("already at root directory")
+	}
+
+	// Update current directory to parent
+	a.currentDir = parentDir
+	a.UpdateWindowTitleWithCurrentDir()
+
+	// Get parent directory info
+	dirInfo, err := os.Stat(parentDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get directory info for %s: %w", parentDir, err)
+	}
+
+	state := &CurrentFilesState{
+		CurrentDir: &FileEntry{
+			Name:        filepath.Base(parentDir),
+			Path:        parentDir,
+			IsDirectory: true,
+			Size:        dirInfo.Size(),
+			ModTime:     dirInfo.ModTime(),
+		},
+	}
+
+	// Preserve CurrentFile if it still exists
+	if a.currentFile != "" {
+		fileInfo, err := os.Stat(a.currentFile)
+		if err == nil {
+			state.CurrentFile = &FileEntry{
+				Name:        filepath.Base(a.currentFile),
+				Path:        a.currentFile,
+				IsDirectory: false,
+				Size:        fileInfo.Size(),
+				ModTime:     fileInfo.ModTime(),
+			}
+		}
+	}
+
+	return state, nil
 }
 
 // DeleteFile deletes a file or directory
@@ -143,16 +222,39 @@ func (a *App) GetContentHash(content string) string {
 // GetCurrentState returns the current directory, file, and its content,
 // along with the file list of the current directory.
 func (a *App) GetCurrentFilesState() CurrentFilesState {
-	state := CurrentFilesState{
-		CurrentDir:  a.currentDir,
-		CurrentFile: a.currentFile,
+	state := CurrentFilesState{}
+
+	// Populate CurrentDir
+	if a.currentDir != "" {
+		dirInfo, err := os.Stat(a.currentDir)
+		if err == nil {
+			state.CurrentDir = &FileEntry{
+				Name:        filepath.Base(a.currentDir),
+				Path:        a.currentDir,
+				IsDirectory: true,
+				Size:        dirInfo.Size(),
+				ModTime:     dirInfo.ModTime(),
+			}
+		}
 	}
 
-	// Calculate content hash if there's a current file
+	// Populate CurrentFile
 	if a.currentFile != "" {
-		content, err := os.ReadFile(a.currentFile)
+		fileInfo, err := os.Stat(a.currentFile)
 		if err == nil {
-			state.ContentHash = a.GetContentHash(string(content))
+			state.CurrentFile = &FileEntry{
+				Name:        filepath.Base(a.currentFile),
+				Path:        a.currentFile,
+				IsDirectory: false,
+				Size:        fileInfo.Size(),
+				ModTime:     fileInfo.ModTime(),
+			}
+
+			// Calculate content hash
+			content, err := os.ReadFile(a.currentFile)
+			if err == nil {
+				state.ContentHash = a.GetContentHash(string(content))
+			}
 		}
 	}
 

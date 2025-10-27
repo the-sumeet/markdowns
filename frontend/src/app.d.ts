@@ -12,9 +12,9 @@ declare global {
 		// interface Platform {}
 
 		interface AppState {
-			currentFile?: string
+			currentFile?: main.FileEntry
 			contentHash?: string
-			currentDir?: string
+			currentDir?: main.FileEntry
 			refreshTrigger?: number
 			staleContent?: boolean
 		}

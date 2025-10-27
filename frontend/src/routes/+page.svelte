@@ -30,6 +30,7 @@
 			GetFileContent(appState.currentFile)
 				.then((data) => {
 					setEditorContent(data);
+					appState.staleContent = false;
 				})
 				.catch((error) => {
 					console.error('Error loading file:', error);

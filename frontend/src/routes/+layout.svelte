@@ -9,9 +9,7 @@
 	import { GetCurrentFilesState } from '$lib/wailsjs/go/main/App';
 	import { appState } from '../store.svelte';
 	import type { main } from '$lib/wailsjs/go/models';
-	import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import Plus from '@lucide/svelte/icons/plus';
 
 	let { children } = $props();
 

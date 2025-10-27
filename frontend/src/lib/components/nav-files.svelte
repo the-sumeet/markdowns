@@ -9,7 +9,7 @@
 	import Folder from '@lucide/svelte/icons/folder';
 	import File from '@lucide/svelte/icons/file';
 	import SquareArrowDown from '@lucide/svelte/icons/square-arrow-down';
-	import { OpenFile, ListFiles, DeleteFile, RenameFile, UpdateWindowTitleWithCurrentDir } from '$lib/wailsjs/go/main/App';
+	import { OpenFile, ListFiles, DeleteFile, RenameFile, UpdateWindowTitleWithCurrentDir, GoUp } from '$lib/wailsjs/go/main/App';
 	import { onMount } from 'svelte';
 	import type { main } from '$lib/wailsjs/go/models';
 	import { appState } from '../../store.svelte';
@@ -79,7 +79,7 @@
 		// Watch both currentDir and refreshTrigger to reload files
 		appState.refreshTrigger;
 		if (appState.currentDir) {
-			ListFiles(appState.currentDir).then((res: main.FileEntry[]) => {
+			ListFiles(appState.currentDir.path).then((res: main.FileEntry[]) => {
 				files = res;
 			});
 		}
@@ -93,19 +93,15 @@
 <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
 	<!-- <Sidebar.GroupLabel>Projects</Sidebar.GroupLabel> -->
 	<Sidebar.Menu>
-		{#if appState.currentDir !== '/'}
+		{#if appState.currentDir?.path !== '/'}
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton
 					onclick={() => {
-						if (appState.currentDir) {
-							const parentDir = appState.currentDir.split('/').slice(0, -1).join('/') || '/';
-							ListFiles(parentDir).then((res: main.FileEntry[]) => {
-								files = res;
-								appState.currentDir = parentDir;
-								// Update window title
-								UpdateWindowTitleWithCurrentDir();
-							});
-						}
+						GoUp().then((res) => {
+							appState.currentDir = res.currentDir;
+							appState.currentFile = res.currentFile;
+							appState.contentHash = res.contentHash;
+						});
 					}}
 				>
 					<span>..</span>
@@ -120,8 +116,10 @@
 						!file.name.endsWith('.markdown')}
 					onclick={() => {
 						OpenFile(file.path).then((res) => {
+							console.log('Opened file:', res);
 							appState.currentDir = res.currentDir;
 							appState.currentFile = res.currentFile;
+							appState.contentHash = res.contentHash;
 						});
 					}}
 				>
