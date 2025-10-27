@@ -9,7 +9,7 @@
 	import Folder from '@lucide/svelte/icons/folder';
 	import File from '@lucide/svelte/icons/file';
 	import SquareArrowDown from '@lucide/svelte/icons/square-arrow-down';
-	import { OpenFile, ListFiles, DeleteFile, RenameFile } from '$lib/wailsjs/go/main/App';
+	import { OpenFile, ListFiles, DeleteFile, RenameFile, UpdateWindowTitleWithCurrentDir } from '$lib/wailsjs/go/main/App';
 	import { onMount } from 'svelte';
 	import type { main } from '$lib/wailsjs/go/models';
 	import { appState } from '../../store.svelte';
@@ -102,6 +102,8 @@
 							ListFiles(parentDir).then((res: main.FileEntry[]) => {
 								files = res;
 								appState.currentDir = parentDir;
+								// Update window title
+								UpdateWindowTitleWithCurrentDir();
 							});
 						}
 					}}

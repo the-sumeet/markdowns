@@ -8,6 +8,8 @@ export function CreateFile(arg1:string):Promise<void>;
 
 export function DeleteFile(arg1:string):Promise<void>;
 
+export function GetContentHash(arg1:string):Promise<string>;
+
 export function GetCurrentFilesState():Promise<main.CurrentFilesState>;
 
 export function GetFileContent(arg1:string):Promise<string>;
@@ -21,3 +23,7 @@ export function OpenFile(arg1:string):Promise<main.CurrentFilesState>;
 export function RenameFile(arg1:string,arg2:string):Promise<void>;
 
 export function SaveFile(arg1:string,arg2:string):Promise<void>;
+
+export function SetWindowTitle(arg1:string):Promise<void>;
+
+export function UpdateWindowTitleWithCurrentDir():Promise<void>;

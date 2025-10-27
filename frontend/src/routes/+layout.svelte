@@ -9,6 +9,9 @@
 	import { GetCurrentFilesState } from '$lib/wailsjs/go/main/App';
 	import { appState } from '../store.svelte';
 	import type { main } from '$lib/wailsjs/go/models';
+	import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import Plus from '@lucide/svelte/icons/plus';
 
 	let { children } = $props();
 
@@ -16,6 +19,7 @@
 		GetCurrentFilesState().then((res: main.CurrentFilesState) => {
 			appState.currentDir = res.currentDir;
 			appState.currentFile = res.currentFile;
+			appState.contentHash = res.contentHash;
 		});
 	});
 </script>
@@ -26,12 +30,18 @@
 
 <Sidebar.Provider class="h-screen">
 	<AppSidebar />
-	<Sidebar.Inset class="flex flex-col max-w-full">
-		<header class="flex h-16 shrink-0 items-center gap-2 max-w-full">
-			<div class="flex items-center gap-2 px-4">
-				<Sidebar.Trigger class="-ml-1" />
-				<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-				
+	<Sidebar.Inset class="flex max-w-full flex-col">
+		<header class="flex h-16 max-w-full shrink-0 items-center gap-2">
+			<div class="flex-1 flex justify-around gap-2 px-4">
+				<div class="flex flex-1">
+					<Sidebar.Trigger class="-ml-1" />
+					<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
+				</div>
+				<div class="flex">
+					{#if appState.staleContent}
+					<Button>Save</Button>
+					{/if}
+				</div>
 				<!-- <Breadcrumb.Root>
 					<Breadcrumb.List>
 						<Breadcrumb.Item class="hidden md:block">

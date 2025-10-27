@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,6 +23,7 @@ type CurrentFilesState struct {
 	CurrentDir  string     `json:"currentDir"`
 	CurrentFile string     `json:"currentFile"`
 	FileInfo    *FileEntry `json:"fileInfo,omitempty"`
+	ContentHash string     `json:"contentHash,omitempty"`
 }
 
 // ListFiles lists files and folders in the given path
@@ -65,9 +68,10 @@ func (a *App) OpenFile(path string) (*CurrentFilesState, error) {
 
 	if info.IsDir() {
 		a.currentDir = path
+		// Update window title when directory changes
+		a.UpdateWindowTitleWithCurrentDir()
 	} else {
 		a.currentFile = path
-
 	}
 
 	return &CurrentFilesState{
@@ -129,13 +133,30 @@ func (a *App) GetFileContent(path string) (string, error) {
 	return string(content), nil
 }
 
+// GetContentHash calculates and returns the SHA-256 hash of the given content
+func (a *App) GetContentHash(content string) string {
+	// Use SHA-256 for fast hashing with low collision chance
+	hash := sha256.Sum256([]byte(content))
+	return hex.EncodeToString(hash[:])
+}
+
 // GetCurrentState returns the current directory, file, and its content,
 // along with the file list of the current directory.
 func (a *App) GetCurrentFilesState() CurrentFilesState {
-	return CurrentFilesState{
+	state := CurrentFilesState{
 		CurrentDir:  a.currentDir,
 		CurrentFile: a.currentFile,
 	}
+
+	// Calculate content hash if there's a current file
+	if a.currentFile != "" {
+		content, err := os.ReadFile(a.currentFile)
+		if err == nil {
+			state.ContentHash = a.GetContentHash(string(content))
+		}
+	}
+
+	return state
 }
 
 // CreateFile creates a new file with the given name in the current directory

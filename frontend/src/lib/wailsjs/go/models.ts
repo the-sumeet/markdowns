@@ -43,6 +43,7 @@ export namespace main {
 	    currentDir: string;
 	    currentFile: string;
 	    fileInfo?: FileEntry;
+	    contentHash?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new CurrentFilesState(source);
@@ -53,6 +54,7 @@ export namespace main {
 	        this.currentDir = source["currentDir"];
 	        this.currentFile = source["currentFile"];
 	        this.fileInfo = this.convertValues(source["fileInfo"], FileEntry);
+	        this.contentHash = source["contentHash"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

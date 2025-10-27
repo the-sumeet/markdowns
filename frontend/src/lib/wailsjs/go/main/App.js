@@ -14,6 +14,10 @@ export function DeleteFile(arg1) {
   return window['go']['main']['App']['DeleteFile'](arg1);
 }
 
+export function GetContentHash(arg1) {
+  return window['go']['main']['App']['GetContentHash'](arg1);
+}
+
 export function GetCurrentFilesState() {
   return window['go']['main']['App']['GetCurrentFilesState']();
 }
@@ -40,4 +44,12 @@ export function RenameFile(arg1, arg2) {
 
 export function SaveFile(arg1, arg2) {
   return window['go']['main']['App']['SaveFile'](arg1, arg2);
+}
+
+export function SetWindowTitle(arg1) {
+  return window['go']['main']['App']['SetWindowTitle'](arg1);
+}
+
+export function UpdateWindowTitleWithCurrentDir() {
+  return window['go']['main']['App']['UpdateWindowTitleWithCurrentDir']();
 }

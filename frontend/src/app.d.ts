@@ -13,8 +13,10 @@ declare global {
 
 		interface AppState {
 			currentFile?: string
+			contentHash?: string
 			currentDir?: string
 			refreshTrigger?: number
+			staleContent?: boolean
 		}
 	}
 }
