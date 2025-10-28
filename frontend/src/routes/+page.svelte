@@ -42,7 +42,7 @@
 
 		<div class="absolute inset-x-2 bottom-10 md:px-8 ">
 			<InputGroup.Root class="!h-auto rounded-xl backdrop-blur  ">
-				<InputGroup.Input class="p-8 !text-xl" placeholder="Search in dir..." />
+				<InputGroup.Input class="p-8 !text-xl" placeholder="Search in folder..." />
 				<InputGroup.Addon align="inline-end">
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
