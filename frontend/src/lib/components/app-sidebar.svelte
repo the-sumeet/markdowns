@@ -1,62 +1,11 @@
-<script lang="ts">
-	import BookOpenIcon from '@lucide/svelte/icons/book-open';
-	import BotIcon from '@lucide/svelte/icons/bot';
-	import ChartPieIcon from '@lucide/svelte/icons/chart-pie';
-	import FrameIcon from '@lucide/svelte/icons/frame';
-	import LifeBuoyIcon from '@lucide/svelte/icons/life-buoy';
-	import MapIcon from '@lucide/svelte/icons/map';
+<script lang="ts" module>
+	import ArchiveXIcon from '@lucide/svelte/icons/archive-x';
+	import FileIcon from '@lucide/svelte/icons/file';
+	import InboxIcon from '@lucide/svelte/icons/inbox';
 	import SendIcon from '@lucide/svelte/icons/send';
-	import Settings2Icon from '@lucide/svelte/icons/settings-2';
-	import SquareTerminalIcon from '@lucide/svelte/icons/square-terminal';
-	import NavFiles from './nav-files.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { type ComponentProps } from 'svelte';
-	import FilePlus from '@lucide/svelte/icons/file-plus';
-	import FolderPlus from '@lucide/svelte/icons/folder-plus';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import { CreateFile, CreateDir, ListFiles } from '$lib/wailsjs/go/main/App';
-	import { appState } from '../../store.svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
-	
-	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
-	// Dialog state
-	let showFileDialog = $state(false);
-	let showDirDialog = $state(false);
-	let fileName = $state('');
-	let dirName = $state('');
-	let errorMessage = $state('');
-
-	// Handle file creation
-	async function handleCreateFile() {
-		errorMessage = '';
-		try {
-			await CreateFile(fileName);
-			showFileDialog = false;
-			fileName = '';
-			// Trigger refresh by incrementing the refreshTrigger
-			appState.refreshTrigger = (appState.refreshTrigger || 0) + 1;
-		} catch (err) {
-			errorMessage = String(err);
-		}
-	}
-
-	// Handle directory creation
-	async function handleCreateDir() {
-		errorMessage = '';
-		try {
-			await CreateDir(dirName);
-			showDirDialog = false;
-			dirName = '';
-			// Trigger refresh by incrementing the refreshTrigger
-			appState.refreshTrigger = (appState.refreshTrigger || 0) + 1;
-		} catch (err) {
-			errorMessage = String(err);
-		}
-	}
-
+	// This is sample data
 	const data = {
 		user: {
 			name: 'shadcn',
@@ -65,128 +14,142 @@
 		},
 		navMain: [
 			{
-				title: 'Playground',
+				title: 'Inbox',
 				url: '#',
-				icon: SquareTerminalIcon,
-				isActive: true,
-				items: [
-					{
-						title: 'History',
-						url: '#'
-					},
-					{
-						title: 'Starred',
-						url: '#'
-					},
-					{
-						title: 'Settings',
-						url: '#'
-					}
-				]
+				icon: InboxIcon,
+				isActive: true
 			},
 			{
-				title: 'Models',
+				title: 'Drafts',
 				url: '#',
-				icon: BotIcon,
-				items: [
-					{
-						title: 'Genesis',
-						url: '#'
-					},
-					{
-						title: 'Explorer',
-						url: '#'
-					},
-					{
-						title: 'Quantum',
-						url: '#'
-					}
-				]
+				icon: FileIcon,
+				isActive: false
 			},
 			{
-				title: 'Documentation',
+				title: 'Sent',
 				url: '#',
-				icon: BookOpenIcon,
-				items: [
-					{
-						title: 'Introduction',
-						url: '#'
-					},
-					{
-						title: 'Get Started',
-						url: '#'
-					},
-					{
-						title: 'Tutorials',
-						url: '#'
-					},
-					{
-						title: 'Changelog',
-						url: '#'
-					}
-				]
+				icon: SendIcon,
+				isActive: false
 			},
 			{
-				title: 'Settings',
+				title: 'Junk',
 				url: '#',
-				icon: Settings2Icon,
-				items: [
-					{
-						title: 'General',
-						url: '#'
-					},
-					{
-						title: 'Team',
-						url: '#'
-					},
-					{
-						title: 'Billing',
-						url: '#'
-					},
-					{
-						title: 'Limits',
-						url: '#'
-					}
-				]
+				icon: ArchiveXIcon,
+				isActive: false
+			},
+			{
+				title: 'Trash',
+				url: '#',
+				icon: Trash2Icon,
+				isActive: false
 			}
 		],
-		navSecondary: [
+		mails: [
 			{
-				title: 'Support',
-				url: '#',
-				icon: LifeBuoyIcon
+				name: 'William Smith',
+				email: 'williamsmith@example.com',
+				subject: 'Meeting Tomorrow',
+				date: '09:34 AM',
+				teaser:
+					'Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates.'
 			},
 			{
-				title: 'Feedback',
-				url: '#',
-				icon: SendIcon
-			}
-		],
-		projects: [
-			{
-				name: 'Design Engineering',
-				url: '#',
-				icon: FrameIcon
+				name: 'Alice Smith',
+				email: 'alicesmith@example.com',
+				subject: 'Re: Project Update',
+				date: 'Yesterday',
+				teaser:
+					"Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps."
 			},
 			{
-				name: 'Sales & Marketing',
-				url: '#',
-				icon: ChartPieIcon
+				name: 'Bob Johnson',
+				email: 'bobjohnson@example.com',
+				subject: 'Weekend Plans',
+				date: '2 days ago',
+				teaser:
+					"Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?"
 			},
 			{
-				name: 'Travel',
-				url: '#',
-				icon: MapIcon
+				name: 'Emily Davis',
+				email: 'emilydavis@example.com',
+				subject: 'Re: Question about Budget',
+				date: '2 days ago',
+				teaser:
+					"I've reviewed the budget numbers you sent over.\nCan we set up a quick call to discuss some potential adjustments?"
+			},
+			{
+				name: 'Michael Wilson',
+				email: 'michaelwilson@example.com',
+				subject: 'Important Announcement',
+				date: '1 week ago',
+				teaser:
+					"Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future."
+			},
+			{
+				name: 'Sarah Brown',
+				email: 'sarahbrown@example.com',
+				subject: 'Re: Feedback on Proposal',
+				date: '1 week ago',
+				teaser:
+					"Thank you for sending over the proposal. I've reviewed it and have some thoughts.\nCould we schedule a meeting to discuss my feedback in detail?"
+			},
+			{
+				name: 'David Lee',
+				email: 'davidlee@example.com',
+				subject: 'New Project Idea',
+				date: '1 week ago',
+				teaser:
+					"I've been brainstorming and came up with an interesting project concept.\nDo you have time this week to discuss its potential impact and feasibility?"
+			},
+			{
+				name: 'Olivia Wilson',
+				email: 'oliviawilson@example.com',
+				subject: 'Vacation Plans',
+				date: '1 week ago',
+				teaser:
+					"Just a heads up that I'll be taking a two-week vacation next month.\nI'll make sure all my projects are up to date before I leave."
+			},
+			{
+				name: 'James Martin',
+				email: 'jamesmartin@example.com',
+				subject: 'Re: Conference Registration',
+				date: '1 week ago',
+				teaser:
+					"I've completed the registration for the upcoming tech conference.\nLet me know if you need any additional information from my end."
+			},
+			{
+				name: 'Sophia White',
+				email: 'sophiawhite@example.com',
+				subject: 'Team Dinner',
+				date: '1 week ago',
+				teaser:
+					"To celebrate our recent project success, I'd like to organize a team dinner.\nAre you available next Friday evening? Please let me know your preferences."
 			}
 		]
 	};
 </script>
 
-<Sidebar.Root bind:ref variant="inset" {...restProps}>
-	<!-- <Sidebar.Header>
+<script lang="ts">
+	import NavUser from './nav-user.svelte';
+	import { Label } from '$lib/components/ui/label/index.js';
+	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { Switch } from '$lib/components/ui/switch/index.js';
+	import CommandIcon from '@lucide/svelte/icons/command';
+	import type { ComponentProps } from 'svelte';
+
+	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+
+	let activeItem = $state(data.navMain[0]);
+	let mails = $state(data.mails);
+	const sidebar = useSidebar();
+</script>
+
+<Sidebar.Root collapsible="none" class="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r">
+	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton size="lg">
+				<Sidebar.MenuButton size="lg" class="md:h-8 md:p-0">
 					{#snippet child({ props })}
 						<a href="##" {...props}>
 							<div
@@ -203,89 +166,39 @@
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
-	</Sidebar.Header> -->
+	</Sidebar.Header>
 	<Sidebar.Content>
-		<!-- <NavMain items={data.navMain} /> -->
-		<NavFiles />
-		<!-- <NavSecondary items={data.navSecondary} class="mt-auto" /> -->
+		<Sidebar.Group>
+			<Sidebar.GroupContent class="px-1.5 md:px-0">
+				<Sidebar.Menu>
+					{#each data.navMain as item (item.title)}
+						<Sidebar.MenuItem>
+							<Sidebar.MenuButton
+								tooltipContentProps={{
+									hidden: false
+								}}
+								onclick={() => {
+									activeItem = item;
+									const mail = data.mails.sort(() => Math.random() - 0.5);
+									mails = mail.slice(0, Math.max(5, Math.floor(Math.random() * 10) + 1));
+									sidebar.setOpen(true);
+								}}
+								isActive={activeItem.title === item.title}
+								class="px-2.5 md:px-2"
+							>
+								{#snippet tooltipContent()}
+									{item.title}
+								{/snippet}
+								<item.icon />
+								<span>{item.title}</span>
+							</Sidebar.MenuButton>
+						</Sidebar.MenuItem>
+					{/each}
+				</Sidebar.Menu>
+			</Sidebar.GroupContent>
+		</Sidebar.Group>
 	</Sidebar.Content>
-	<Sidebar.Footer class="border-t">
-		<div class="flex gap-2 w-full justify-end">
-			<Button variant="outline" size="icon" class="size-8" onclick={() => (showFileDialog = true)}>
-				<FilePlus />
-			</Button>
-			<Button variant="outline" size="icon" class="size-8" onclick={() => (showDirDialog = true)}>
-				<FolderPlus />
-			</Button>
-		</div>
-		<!-- <NavUser user={data.user} /> -->
+	<Sidebar.Footer>
+		<NavUser user={data.user} />
 	</Sidebar.Footer>
 </Sidebar.Root>
-
-<!-- New File Dialog -->
-<Dialog.Root bind:open={showFileDialog}>
-	<Dialog.Content>
-		<Dialog.Header>
-			<Dialog.Title>Create New File</Dialog.Title>
-			<Dialog.Description>
-				Enter a name for the new file. The file will be created in the current directory.
-			</Dialog.Description>
-		</Dialog.Header>
-		<div class="grid gap-4 py-4">
-			<div class="grid gap-2">
-				<Label for="fileName">File name</Label>
-				<Input
-					id="fileName"
-					bind:value={fileName}
-					placeholder="example.md"
-					onkeydown={(e) => {
-						if (e.key === 'Enter') {
-							handleCreateFile();
-						}
-					}}
-				/>
-			</div>
-			{#if errorMessage}
-				<p class="text-sm text-red-500">{errorMessage}</p>
-			{/if}
-		</div>
-		<Dialog.Footer>
-			<Button variant="outline" onclick={() => (showFileDialog = false)}>Cancel</Button>
-			<Button onclick={handleCreateFile} disabled={!fileName.trim()}>Create File</Button>
-		</Dialog.Footer>
-	</Dialog.Content>
-</Dialog.Root>
-
-<!-- New Directory Dialog -->
-<Dialog.Root bind:open={showDirDialog}>
-	<Dialog.Content>
-		<Dialog.Header>
-			<Dialog.Title>Create New Directory</Dialog.Title>
-			<Dialog.Description>
-				Enter a name for the new directory. It will be created in the current directory.
-			</Dialog.Description>
-		</Dialog.Header>
-		<div class="grid gap-4 py-4">
-			<div class="grid gap-2">
-				<Label for="dirName">Directory name</Label>
-				<Input
-					id="dirName"
-					bind:value={dirName}
-					placeholder="my-folder"
-					onkeydown={(e) => {
-						if (e.key === 'Enter') {
-							handleCreateDir();
-						}
-					}}
-				/>
-			</div>
-			{#if errorMessage}
-				<p class="text-sm text-red-500">{errorMessage}</p>
-			{/if}
-		</div>
-		<Dialog.Footer>
-			<Button variant="outline" onclick={() => (showDirDialog = false)}>Cancel</Button>
-			<Button onclick={handleCreateDir} disabled={!dirName.trim()}>Create Directory</Button>
-		</Dialog.Footer>
-	</Dialog.Content>
-</Dialog.Root>

@@ -11,15 +11,7 @@
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
 
-	let {
-		user,
-	}: {
-		user: {
-			name: string;
-			email: string;
-			avatar: string;
-		};
-	} = $props();
+	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
 
 	const sidebar = useSidebar();
 </script>
@@ -32,7 +24,7 @@
 					<Sidebar.MenuButton
 						{...props}
 						size="lg"
-						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground md:h-8 md:p-0"
 					>
 						<Avatar.Root class="size-8 rounded-lg">
 							<Avatar.Image src={user.avatar} alt={user.name} />

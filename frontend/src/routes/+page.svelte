@@ -1,158 +1,63 @@
 <script lang="ts">
-	import { Crepe } from '@milkdown/crepe';
-	import '@milkdown/crepe/theme/common/style.css';
-	import '@milkdown/crepe/theme/frame-dark.css';
-	import { onMount, onDestroy } from 'svelte';
-	import { appState } from '../store.svelte';
-	import {
-		GetContentHash,
-		GetCurrentFilesState,
-		GetFileContent,
-		SaveFile
-	} from '$lib/wailsjs/go/main/App';
-	import { editorViewCtx, parserCtx } from '@milkdown/core';
-	import { Slice } from '@milkdown/prose/model';
-	import { fileToBase64 } from '$lib/utils';
-
-	let crepe: Crepe | null = $state(null);
-	let editorReady = $state(false);
-	let readingNewFile = $state(false);
-	let saving = $state(false);
-
-	$effect(() => {
-		if (appState.currentFile && editorReady) {
-			// New file should not be selected unless we're done with the content of the
-			// current markdown content.
-			readingNewFile = true;
-			GetFileContent(appState.currentFile.path)
-				.then((data) => {
-					setEditorContent(data);
-					appState.staleContent = false;
-				})
-				.catch((error) => {
-					console.error('Error loading file:', error);
-				})
-				.finally(() => {
-					readingNewFile = false;
-				});
-		}
-	});
-
-	// Function to set markdown content in the editor
-	function setEditorContent(markdown: string) {
-		if (!crepe || !editorReady) return;
-
-		try {
-			crepe.editor.action((ctx) => {
-				const view = ctx.get(editorViewCtx);
-				const parser = ctx.get(parserCtx);
-				const doc = parser(markdown);
-
-				if (!doc) return;
-
-				const state = view.state;
-				view.dispatch(state.tr.replace(0, state.doc.content.size, new Slice(doc.content, 0, 0)));
-			});
-		} catch (error) {
-			console.error('Error setting editor content:', error);
-		}
-	}
-
-	function saveContentToFile() {
-		if (!appState.currentFile || !crepe || !editorReady) return;
-
-		const currentContent = crepe?.getMarkdown();
-
-		saving = true;
-
-		SaveFile(appState.currentFile.path, currentContent)
-			.then(async () => {
-				// Update content hash after saving
-				const newState = await GetCurrentFilesState();
-				appState.currentDir = newState.currentDir;
-				appState.currentFile = newState.currentFile;
-				appState.contentHash = newState.contentHash;
-			})
-			.catch((error) => {
-				console.error('Error saving file:', error);
-			})
-			.finally(() => {
-				saving = false;
-			});
-	}
-
-	onMount(() => {
-		// Make save function available to layout
-		appState.saveFile = saveContentToFile;
-
-		// Create editor instance with base64 uploader
-		crepe = new Crepe({
-			root: document.getElementById('editor'),
-			defaultValue: '# Hello, Crepe!\n\nStart writing your markdown...',
-			featureConfigs: {
-				'image-block': {
-					async blockOnUpload(file: File) {
-						console.log('Converting image to base64...');
-
-						try {
-							// Convert file to base64 data URI
-							const base64DataUri = await fileToBase64(file);
-							console.log('Image converted to base64');
-							return base64DataUri;
-						} catch (error) {
-							console.error('Error converting image to base64:', error);
-							return '';
-						}
-					}
-				}
-			}
-		});
-
-		// Register content change listener
-		crepe.on((listener) => {
-			listener.markdownUpdated((ctx, markdown, prevMarkdown) => {
-				if (markdown !== prevMarkdown) {
-					GetContentHash(markdown).then((hash) => {
-						console.log('Content hash updated:', hash);
-						console.log('old markdown:', prevMarkdown);
-						console.log('new markdown:', markdown);
-						if (appState.contentHash !== hash) {
-							appState.staleContent = true;
-						} else {
-							appState.staleContent = false;
-						}
-					});
-				}
-			});
-		});
-
-		crepe.create().then(() => {
-			editorReady = true;
-		});
-	});
-
-	onDestroy(() => {
-		// Clean up when component is destroyed
-		editorReady = false;
-		crepe?.destroy();
-		appState.saveFile = undefined;
-	});
+	import * as Card from '$lib/components/ui/card/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import * as InputGroup from '$lib/components/ui/input-group/index.js';
+	import MoreHorizontalIcon from '@lucide/svelte/icons/more-horizontal';
 </script>
 
-<div class="h-full">
-	<div id="editor" class="h-full rounded-xl"></div>
-</div>
+<div class="relative flex h-full flex-col gap-8 p-2 md:px-10 xl:px-14">
+	<!-- <InputGroup.Root class="border-0 bg-transparent focus-visible:ring-0 dark:bg-transparent">
+		<InputGroup.Input placeholder="Search..." />
+		<InputGroup.Addon>
+			<SearchIcon />
+		</InputGroup.Addon>
+	</InputGroup.Root> -->
 
-<style>
-	:global(.milkdown) {
-		border-radius: 12px;
-		overflow-y: hidden;
-		height: 100% !important;
-		margin: 0px !important;
-		width: 100% !important;
-		max-width: 100% !important;
-		max-height: 100% !important;
-		border: 0px !important;
-		overflow-y: auto !important;
-	}
-</style>
+	<div class="flex flex-1 flex-col gap-12 overflow-y-auto pt-12 w-full">
+		<div class="flex flex-col">
+			<h1 class="text-6xl font-extrabold">Foo</h1>
+			<p class="text-muted-foreground">/Foo/bar/baz/...</p>
+		</div>
+
+		<div class="flex w-full justify-center">
+			<div class="max-w-8xl flex flex-1 flex-wrap">
+				{#each Array(100) as i}
+					<div class="xl:1/4 w-full p-2 md:w-1/2 lg:w-1/3 xl:w-1/4">
+						<Card.Root class="">
+							<Card.Header>
+								<Card.Title>Card Title</Card.Title>
+								<Card.Description>Card Description</Card.Description>
+							</Card.Header>
+							<Card.Content>
+								<p>Card Content</p>
+							</Card.Content>
+							<Card.Footer>
+								<p>Card Footer</p>
+							</Card.Footer>
+						</Card.Root>
+					</div>
+				{/each}
+			</div>
+		</div>
+
+		<InputGroup.Root class="absolute bottom-4 inset-x-2 md:inset-x-10 xl:inset-x-14 max-w-8xl">
+			<InputGroup.Input placeholder="Enter file name" />
+			<InputGroup.Addon align="inline-end">
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						{#snippet child({ props })}
+							<InputGroup.Button {...props} variant="ghost" aria-label="More" size="icon-xs">
+								<MoreHorizontalIcon />
+							</InputGroup.Button>
+						{/snippet}
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content align="end">
+						<DropdownMenu.Item>Settings</DropdownMenu.Item>
+						<DropdownMenu.Item>Copy path</DropdownMenu.Item>
+						<DropdownMenu.Item>Open location</DropdownMenu.Item>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			</InputGroup.Addon>
+		</InputGroup.Root>
+	</div>
+</div>

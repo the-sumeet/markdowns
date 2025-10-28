@@ -42,9 +42,10 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "markdowns",
-		Width:  1024,
-		Height: 768,
+		Title:     "markdowns",
+		Width:     1024,
+		Frameless: true,
+		Height:    768,
 		AssetServer: &assetserver.Options{
 			Assets:  assets,
 			Handler: NewFileLoader(),
