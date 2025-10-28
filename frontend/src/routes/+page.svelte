@@ -9,9 +9,13 @@
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-
+  import { Skeleton } from "$lib/components/ui/skeleton/index.js";
+  
 	let hoveredCard = $state<number | null>(null);
 	let files: main.FileEntry[] = $state([]);
+	let fileContentPreview: {
+		[fileID: string]: string;
+	} = $state({});
 
 	onMount(() => {
 		ListFiles("").then((res) => {
@@ -48,7 +52,12 @@
 								<!-- <Card.Description>{file.description}</Card.Description> -->
 							</Card.Header>
 							<Card.Content>
-								<p>Card Content</p>
+								<div class="flex flex-col gap-1">
+									<Skeleton class="h-[20px] max-w-[128px] rounded-full" />
+									<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
+									<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
+									<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
+								</div>
 							</Card.Content>
 							<Card.Footer class="flex justify-between">
 								<p class="text-sm text-muted-foreground">{new Date(file.modTime).toLocaleString()}</p>
