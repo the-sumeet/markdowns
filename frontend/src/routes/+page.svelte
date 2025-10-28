@@ -3,11 +3,21 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as InputGroup from '$lib/components/ui/input-group/index.js';
+	import { ListFiles } from '$lib/wailsjs/go/main/App';
+	import type { main } from '$lib/wailsjs/go/models';
 	import MoreHorizontalIcon from '@lucide/svelte/icons/more-horizontal';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 
 	let hoveredCard = $state<number | null>(null);
+	let files: main.FileEntry[] = $state([]);
+
+	onMount(() => {
+		ListFiles("").then((res) => {
+			files = res;
+		});
+	});
 </script>
 
 <div class="relative flex h-full flex-col gap-8 p-2 md:px-10 xl:px-14">
@@ -26,7 +36,7 @@
 
 		<div class="flex w-full justify-center">
 			<div class="max-w-8xl flex flex-1 flex-wrap">
-				{#each Array(100) as _, i}
+				{#each files as file, i}
 					<div
 						class="xl:1/4 w-full p-2 md:w-1/2 lg:w-1/3 xl:w-1/4"
 						onmouseenter={() => (hoveredCard = i)}
@@ -34,13 +44,14 @@
 					>
 						<Card.Root class="">
 							<Card.Header>
-								<Card.Title>Card Title</Card.Title>
-								<Card.Description>Card Description</Card.Description>
+								<Card.Title class="truncate">{file.name}</Card.Title>
+								<!-- <Card.Description>{file.description}</Card.Description> -->
 							</Card.Header>
 							<Card.Content>
 								<p>Card Content</p>
 							</Card.Content>
 							<Card.Footer class="flex justify-between">
+								<p class="text-sm text-muted-foreground">{new Date(file.modTime).toLocaleString()}</p>
 
 								{#if hoveredCard === i}
 									<div transition:fade={{ duration: 200 }}>

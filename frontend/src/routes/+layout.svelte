@@ -5,7 +5,7 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { onMount } from 'svelte';
-	import { ListFiles } from '$lib/wailsjs/go/main/App';
+	import { GetCurrentFilesState, ListFiles } from '$lib/wailsjs/go/main/App';
 	import { appState } from '../store.svelte';
 	import type { main } from '$lib/wailsjs/go/models';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -13,11 +13,10 @@
 
 	let { children } = $props();
 
-	let files: main.FileEntry[] = $state([]);
-
 	onMount(() => {
-		ListFiles("").then((res: main.FileEntry[]) => {
-			files = res;
+		GetCurrentFilesState().then((res: main.CurrentFilesState) => {
+			appState.currentDir = res.currentDir;
+			appState.currentFile = res.currentFile;
 		});
 	});
 </script>

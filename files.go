@@ -26,7 +26,6 @@ type CurrentFilesState struct {
 	ContentHash string     `json:"contentHash,omitempty"`
 }
 
-// ListFiles lists files and folders in the given path
 func (a *App) ListFiles(path string) ([]FileEntry, error) {
 	dirPath := path
 	if dirPath == "" {
