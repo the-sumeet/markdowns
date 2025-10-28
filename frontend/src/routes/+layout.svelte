@@ -26,12 +26,14 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="flex h-screen overflow-y-hidden">
+<div class="flex h-screen flex-col overflow-y-hidden bg-background">
+	
+	<div class="flex flex-1 overflow-hidden">
+		<Sidebar />
 
-	<Sidebar />
-
-	<div class="flex-1">
-		{@render children()}
+		<div class="flex-1">
+			{@render children()}
+		</div>
 	</div>
 </div>
 
