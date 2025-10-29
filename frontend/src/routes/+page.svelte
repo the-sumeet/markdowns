@@ -74,10 +74,9 @@
 								</Card.Title>
 								<!-- <Card.Description>{file.description}</Card.Description> -->
 							</Card.Header>
+							{#if !file.isDirectory}
 							<Card.Content class="min-w-0 flex-1">
-								{#if file.isDirectory || !isMarkdownFile(file.name)}
-									
-								{:else if fileContentPreview[file.path]}
+								{#if fileContentPreview[file.path]}
 									<p class="text-muted-foreground text-sm whitespace-pre-wrap truncate overflow-hidden">
 										{fileContentPreview[file.path]}
 									</p>
@@ -90,6 +89,7 @@
 									</div>
 								{/if}
 							</Card.Content>
+							{/if}
 							<Card.Footer class="flex justify-between">
 								<p class="text-muted-foreground text-sm">
 									{new Date(file.modTime).toLocaleString()}
