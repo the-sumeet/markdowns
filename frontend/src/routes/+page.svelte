@@ -3,22 +3,40 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as InputGroup from '$lib/components/ui/input-group/index.js';
-	import { ListFiles } from '$lib/wailsjs/go/main/App';
+	import { GetFileContentPreview, ListFiles } from '$lib/wailsjs/go/main/App';
 	import type { main } from '$lib/wailsjs/go/models';
 	import MoreHorizontalIcon from '@lucide/svelte/icons/more-horizontal';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-  import { Skeleton } from "$lib/components/ui/skeleton/index.js";
-  
+	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
+	import { isMarkdownFile } from '$lib/utils';
+	import Folder from '@lucide/svelte/icons/folder';
+
 	let hoveredCard = $state<number | null>(null);
 	let files: main.FileEntry[] = $state([]);
+
+	$effect(() => {
+		if (files) {
+			files.forEach((file) => {
+				if (file.isDirectory) return;
+				if (!isMarkdownFile(file.name)) return;
+				console.log('Fetching preview for file:', file.path);
+				if (!fileContentPreview[file.path]) {
+					GetFileContentPreview(file.path).then((res) => {
+						console.log('Received preview for file:', file.path, res);
+						fileContentPreview[file.path] = res;
+					});
+				}
+			});
+		}
+	});
 	let fileContentPreview: {
 		[fileID: string]: string;
 	} = $state({});
 
 	onMount(() => {
-		ListFiles("").then((res) => {
+		ListFiles('').then((res) => {
 			files = res;
 		});
 	});
@@ -39,28 +57,43 @@
 		</div>
 
 		<div class="flex w-full justify-center">
-			<div class="max-w-8xl flex flex-1 flex-wrap">
+			<div class="max-w-8xl flex flex-1 flex-wrap items-stretch">
 				{#each files as file, i}
 					<div
-						class="xl:1/4 w-full p-2 md:w-1/2 lg:w-1/3 xl:w-1/4"
+						class="w-full p-2 md:w-1/2 lg:w-1/3 xl:w-1/4 flex"
 						onmouseenter={() => (hoveredCard = i)}
 						onmouseleave={() => (hoveredCard = null)}
 					>
-						<Card.Root class="">
+						<Card.Root class="w-full flex flex-col hover:shadow-md transition-shadow duration-200">
 							<Card.Header>
-								<Card.Title class="truncate">{file.name}</Card.Title>
+								<Card.Title class="truncate">
+									{#if file.isDirectory}
+										<Folder class="inline-block mr-2 size-5 text-muted-foreground" />
+									{/if}
+									{file.name}
+								</Card.Title>
 								<!-- <Card.Description>{file.description}</Card.Description> -->
 							</Card.Header>
-							<Card.Content>
-								<div class="flex flex-col gap-1">
-									<Skeleton class="h-[20px] max-w-[128px] rounded-full" />
-									<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
-									<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
-									<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
-								</div>
+							<Card.Content class="min-w-0 flex-1">
+								{#if file.isDirectory || !isMarkdownFile(file.name)}
+									
+								{:else if fileContentPreview[file.path]}
+									<p class="text-muted-foreground text-sm whitespace-pre-wrap truncate overflow-hidden">
+										{fileContentPreview[file.path]}
+									</p>
+								{:else}
+									<div class="flex flex-col gap-1">
+										<Skeleton class="h-[20px] max-w-[128px] rounded-full" />
+										<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
+										<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
+										<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
+									</div>
+								{/if}
 							</Card.Content>
 							<Card.Footer class="flex justify-between">
-								<p class="text-sm text-muted-foreground">{new Date(file.modTime).toLocaleString()}</p>
+								<p class="text-muted-foreground text-sm">
+									{new Date(file.modTime).toLocaleString()}
+								</p>
 
 								{#if hoveredCard === i}
 									<div transition:fade={{ duration: 200 }}>

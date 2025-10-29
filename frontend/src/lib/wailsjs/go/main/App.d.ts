@@ -14,6 +14,8 @@ export function GetCurrentFilesState():Promise<main.CurrentFilesState>;
 
 export function GetFileContent(arg1:string):Promise<string>;
 
+export function GetFileContentPreview(arg1:string):Promise<string>;
+
 export function GoUp():Promise<main.CurrentFilesState>;
 
 export function Greet(arg1:string):Promise<string>;

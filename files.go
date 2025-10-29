@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -43,6 +45,14 @@ func (a *App) ListFiles(path string) ([]FileEntry, error) {
 		if err != nil {
 			fmt.Printf("Error getting info for %s: %v\n", entry.Name(), err)
 			continue
+		}
+
+		// Only include directories or markdown files
+		if !entry.IsDir() {
+			ext := strings.ToLower(filepath.Ext(entry.Name()))
+			if ext != ".md" && ext != ".markdown" {
+				continue
+			}
 		}
 
 		fileEntries = append(fileEntries, FileEntry{
@@ -170,6 +180,46 @@ func (a *App) GetFileContent(path string) (string, error) {
 	}
 
 	return string(content), nil
+}
+
+// GetFileContentPreview reads and returns the first 4 lines of the specified file
+// Each line is truncated to max 128 characters with "..." appended if longer
+func (a *App) GetFileContentPreview(path string) (string, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to get file info for %s: %w", path, err)
+	}
+
+	if info.IsDir() {
+		return "", fmt.Errorf("path %s is a directory, not a file", path)
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file %s: %w", path, err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lines := []string{}
+	lineCount := 0
+	maxChars := 128
+
+	for scanner.Scan() && lineCount < 4 {
+		line := scanner.Text()
+		// Truncate line if longer than maxChars
+		if len(line) > maxChars {
+			line = line[:maxChars] + "..."
+		}
+		lines = append(lines, line)
+		lineCount++
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("failed to read file %s: %w", path, err)
+	}
+
+	return strings.Join(lines, "\n"), nil
 }
 
 // GetContentHash calculates and returns the SHA-256 hash of the given content
