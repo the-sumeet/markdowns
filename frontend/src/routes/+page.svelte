@@ -57,7 +57,7 @@
 	onMount(() => {});
 </script>
 
-<div class="relative flex h-full flex-col gap-8 p-2 md:px-10 xl:px-14">
+<div class="relative flex h-full flex-col gap-8 p-2 md:px-10 xl:px-14 " >
 	<!-- <InputGroup.Root class="border-0 bg-transparent focus-visible:ring-0 dark:bg-transparent">
 		<InputGroup.Input placeholder="Search..." />
 		<InputGroup.Addon>
@@ -82,7 +82,7 @@
 						onmouseleave={() => (hoveredCard = null)}
 					>
 						<Card.Root
-							class="flex w-full cursor-pointer flex-col transition-shadow duration-200 hover:shadow-md"
+							class="flex w-full cursor-pointer flex-col transition-shadow duration-200 hover:shadow-md backdrop-blur-md bg-white/40 dark:bg-white/10"
 							onclick={() => opne(file)}
 						>
 							<Card.Header>
@@ -147,11 +147,11 @@
 					appState.currentFile = res.currentFile;
 					appState.contentHash = res.contentHash;
 				});
-			}} size="lg" variant="outline" class="aspect-square rounded-xl p-8">
+			}} size="lg" variant="outline" class="backdrop-blur bg-transparent aspect-square rounded-xl p-8">
 				<FolderUp />
 			</Button>
 
-			<InputGroup.Root class="!h-auto rounded-xl backdrop-blur  ">
+			<InputGroup.Root class="!h-auto rounded-xl backdrop-blur">
 				<InputGroup.Input class="p-8 !text-xl" placeholder="Search in folder..." />
 				<InputGroup.Addon align="inline-end">
 					<DropdownMenu.Root>

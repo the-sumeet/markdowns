@@ -23,10 +23,24 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<style>
+		.gradient-bg {
+			background: radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 60%),
+						radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%);
+		}
+		.dark .gradient-bg {
+			background: radial-gradient(ellipse at 20% 30%, rgba(56, 189, 248, 0.4) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 70%, rgba(139, 92, 246, 0.3) 0%, transparent 70%),
+        radial-gradient(ellipse at 60% 20%, rgba(236, 72, 153, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 40% 80%, rgba(34, 197, 94, 0.2) 0%, transparent 65%)
+		}
+	</style>
 </svelte:head>
 
-<div class="flex h-screen flex-col overflow-y-hidden bg-background">
-	
+
+
+
+<div class="gradient-bg flex h-screen flex-col overflow-y-hidden">
 	<div class="flex flex-1 overflow-hidden">
 		<Sidebar />
 
@@ -35,5 +49,4 @@
 		</div>
 	</div>
 </div>
-
 
