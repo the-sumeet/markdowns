@@ -231,6 +231,13 @@ func (a *App) GetContentHash(content string) string {
 	return hex.EncodeToString(hash[:])
 }
 
+// ClearCurrentFile clears the current file state and returns the updated state
+func (a *App) ClearCurrentFile() CurrentFilesState {
+	a.currentFile = ""
+	a.currentFileContent = ""
+	return a.GetCurrentFilesState()
+}
+
 // GetCurrentState returns the current directory, file, and its content,
 // along with the file list of the current directory.
 func (a *App) GetCurrentFilesState() CurrentFilesState {

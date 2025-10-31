@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { main } from "./wailsjs/go/models";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -23,4 +24,13 @@ export function fileToBase64(file: File): Promise<string> {
 
 export function isMarkdownFile(fileName: string): boolean {
 	return fileName.endsWith('.md') || fileName.endsWith('.markdown');
+}
+
+export function updateAppState(
+	appState: App.AppState,
+	currentState: main.CurrentFilesState
+) {
+	appState.currentDir = currentState.currentDir;
+	appState.currentFile = currentState.currentFile;
+	appState.contentHash = currentState.contentHash;
 }

@@ -13,6 +13,7 @@
 	import Folder from '@lucide/svelte/icons/folder';
 	import { appState } from '../store.svelte';
 	import FolderUp from '@lucide/svelte/icons/folder-up';
+	import { goto } from '$app/navigation';
 
 	let hoveredCard = $state<number | null>(null);
 	let files: main.FileEntry[] = $state([]);
@@ -36,14 +37,14 @@
 	} = $state({});
 
 	function opne(file: main.FileEntry) {
-		if (file.isDirectory) {
-			OpenFile(file.path).then((res: main.CurrentFilesState) => {
-				appState.currentDir = res.currentDir;
-				appState.currentFile = res.currentFile;
-				appState.contentHash = res.contentHash;
-			});
-		} else {
-			// open file
+		OpenFile(file.path).then((res: main.CurrentFilesState) => {
+			appState.currentDir = res.currentDir;
+			appState.currentFile = res.currentFile;
+			appState.contentHash = res.contentHash;
+		});
+
+		if (!file.isDirectory) {
+			goto(`/note`);
 		}
 	}
 
@@ -58,7 +59,7 @@
 	onMount(() => {});
 </script>
 
-<div class="relative flex h-full flex-col gap-8 p-2 md:px-10 xl:px-14 " >
+<div class="relative flex h-full flex-col gap-8 p-2 md:px-10 xl:px-14">
 	<!-- <InputGroup.Root class="border-0 bg-transparent focus-visible:ring-0 dark:bg-transparent">
 		<InputGroup.Input placeholder="Search..." />
 		<InputGroup.Addon>
@@ -83,7 +84,7 @@
 						onmouseleave={() => (hoveredCard = null)}
 					>
 						<Card.Root
-							class="flex w-full cursor-pointer flex-col transition-shadow duration-200 hover:shadow-md backdrop-blur-md bg-white/40 dark:bg-white/10"
+							class="flex w-full cursor-pointer flex-col bg-white/40 backdrop-blur-md transition-shadow duration-200 hover:shadow-md dark:bg-white/10"
 							onclick={() => opne(file)}
 						>
 							<Card.Header>
@@ -105,16 +106,23 @@
 										</p>
 									{:else}
 										<div class="flex flex-col gap-1">
-											<Skeleton class="h-[20px] max-w-[128px] rounded-full bg-transparent backdrop-blur" />
-											<Skeleton class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur" />
-											<Skeleton class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur" />
-											<Skeleton class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur" />
+											<Skeleton
+												class="h-[20px] max-w-[128px] rounded-full bg-transparent backdrop-blur"
+											/>
+											<Skeleton
+												class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur"
+											/>
+											<Skeleton
+												class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur"
+											/>
+											<Skeleton
+												class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur"
+											/>
 										</div>
 									{/if}
 								</Card.Content>
 							{:else}
-							<Card.Content class="min-w-0 flex-1">
-								</Card.Content>
+								<Card.Content class="min-w-0 flex-1"></Card.Content>
 							{/if}
 							<Card.Footer class="flex justify-between">
 								<p class="text-muted-foreground text-sm">
@@ -142,13 +150,18 @@
 		</div>
 
 		<div class="absolute inset-x-2 bottom-10 flex items-center gap-2 md:px-8">
-			<Button onclick={() => {
-				GoUp().then((res: main.CurrentFilesState) => {
-					appState.currentDir = res.currentDir;
-					appState.currentFile = res.currentFile;
-					appState.contentHash = res.contentHash;
-				});
-			}} size="lg" variant="outline" class="backdrop-blur bg-transparent aspect-square rounded-xl p-8">
+			<Button
+				onclick={() => {
+					GoUp().then((res: main.CurrentFilesState) => {
+						appState.currentDir = res.currentDir;
+						appState.currentFile = res.currentFile;
+						appState.contentHash = res.contentHash;
+					});
+				}}
+				size="lg"
+				variant="outline"
+				class="aspect-square rounded-xl bg-transparent p-8 backdrop-blur"
+			>
 				<FolderUp />
 			</Button>
 

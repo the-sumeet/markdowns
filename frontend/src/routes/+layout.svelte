@@ -10,6 +10,7 @@
 	import type { main } from '$lib/wailsjs/go/models';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Sidebar from './Sidebar.svelte';
+	import { goto } from '$app/navigation';
 
 	let { children } = $props();
 
@@ -18,6 +19,12 @@
 			appState.currentDir = res.currentDir;
 			appState.currentFile = res.currentFile;
 		});
+	});
+
+	$effect(() => {
+		if (appState.currentFile) {
+			goto('/note')
+		}
 	});
 </script>
 
