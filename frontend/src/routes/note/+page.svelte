@@ -65,9 +65,12 @@
 	<div
 		class="mb-4 flex justify-between rounded-xl bg-white/30 p-4 backdrop-blur-md dark:bg-black/30"
 	>
-		<h1 class="flex-1 text-3xl font-extrabold">{appState.currentFile?.name}</h1>
+		<div class="flex-1">
+            <h1 class=" text-3xl font-extrabold">{appState.currentFile?.name}</h1>
+        </div>
 		<div class="flex">
 			<Button
+            variant="outline"
 				size="icon"
 				class="size-8 rounded-full"
 				onclick={() => {

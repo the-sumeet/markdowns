@@ -47,7 +47,7 @@
 
 
 
-<div class="gradient-bg flex h-screen flex-col overflow-y-hidden">
+<div class="gradient-bg flex h-screen flex-col overflow-y-hidden ">
 	<div class="flex flex-1 overflow-hidden">
 		<Sidebar />
 
