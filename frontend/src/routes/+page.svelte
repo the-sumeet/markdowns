@@ -23,6 +23,7 @@
 				if (file.isDirectory) return;
 				if (!fileContentPreview[file.path]) {
 					GetFileContentPreview(file.path).then((res) => {
+						console.log('res', file.path);
 						console.log('res', res);
 						fileContentPreview[file.path] = res;
 					});
@@ -88,7 +89,7 @@
 							<Card.Header>
 								<Card.Title class="truncate">
 									{#if file.isDirectory}
-										<Folder class="text-muted-foreground mr-2 inline-block size-5" />
+										<Folder class=" mr-2 inline-block size-5" />
 									{/if}
 									{file.name}
 								</Card.Title>
@@ -96,7 +97,7 @@
 							</Card.Header>
 							{#if !file.isDirectory}
 								<Card.Content class="min-w-0 flex-1">
-									{#if fileContentPreview[file.path]}
+									{#if fileContentPreview[file.path] !== undefined}
 										<p
 											class="text-muted-foreground overflow-hidden truncate whitespace-pre-wrap text-sm"
 										>
@@ -104,10 +105,10 @@
 										</p>
 									{:else}
 										<div class="flex flex-col gap-1">
-											<Skeleton class="h-[20px] max-w-[128px] rounded-full" />
-											<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
-											<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
-											<Skeleton class="h-[20px] max-w-[256px] rounded-full" />
+											<Skeleton class="h-[20px] max-w-[128px] rounded-full bg-transparent backdrop-blur" />
+											<Skeleton class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur" />
+											<Skeleton class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur" />
+											<Skeleton class="h-[20px] max-w-[256px] rounded-full bg-transparent backdrop-blur" />
 										</div>
 									{/if}
 								</Card.Content>
