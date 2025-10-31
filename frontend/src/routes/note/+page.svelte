@@ -60,10 +60,10 @@
 	});
 </script>
 
-<div class="flex h-full w-full flex-col p-4">
+<div class="flex h-full w-full flex-col overflow-hidden p-4">
 	<!-- Topbar -->
 	<div
-		class="mb-4 flex justify-between rounded-xl bg-white/30 p-4 backdrop-blur-md dark:bg-black/30"
+		class="mb-4 flex flex-shrink-0 justify-between rounded-xl bg-white/30 p-4 backdrop-blur-md dark:bg-black/30"
 	>
 		<div class="flex-1">
             <h1 class=" text-3xl font-extrabold">{appState.currentFile?.name}</h1>
@@ -84,7 +84,7 @@
 		</div>
 	</div>
 
-	<div id="editor" class="h-full w-full rounded-xl"></div>
+	<div id="editor" class="min-h-0 flex-1 w-full rounded-xl overflow-hidden"></div>
 </div>
 
 <style>
@@ -98,5 +98,11 @@
 		max-height: 100% !important;
 		border: 0px !important;
 		overflow-y: auto !important;
+		backdrop-filter: blur(12px) !important;
+		background: rgba(255, 255, 255, 0.3) !important;
+	}
+
+	:global(.dark .milkdown) {
+		background: rgba(0, 0, 0, 0.3) !important;
 	}
 </style>
