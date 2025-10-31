@@ -63,7 +63,7 @@
 <div class="flex h-full w-full flex-col overflow-hidden p-4">
 	<!-- Topbar -->
 	<div
-		class="mb-4 flex flex-shrink-0 justify-between rounded-xl bg-white/30 p-4 backdrop-blur-md dark:bg-black/30"
+		class="mb-4 flex shrink-0 justify-between rounded-xl bg-white/30 p-4 backdrop-blur-md dark:bg-black/30"
 	>
 		<div class="flex-1">
             <h1 class=" text-3xl font-extrabold">{appState.currentFile?.name}</h1>
