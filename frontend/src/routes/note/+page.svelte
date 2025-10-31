@@ -10,6 +10,7 @@
 	import CircleX from '@lucide/svelte/icons/circle-x';
 	import { ClearCurrentFile } from '$lib/wailsjs/go/main/App';
 	import { main } from '$lib/wailsjs/go/models';
+	import Save from '@lucide/svelte/icons/save';
 
 	let crepe: Crepe | null = $state(null);
 	let editorReady = $state(false);
@@ -66,11 +67,18 @@
 		class="mb-4 flex shrink-0 justify-between rounded-xl bg-white/30 p-4 backdrop-blur-md dark:bg-black/30"
 	>
 		<div class="flex-1">
-            <h1 class=" text-3xl font-extrabold">{appState.currentFile?.name}</h1>
-        </div>
-		<div class="flex">
+			<h1 class=" text-3xl font-extrabold">{appState.currentFile?.name}</h1>
+		</div>
+		<div class="flex gap-1 items-center">
 			<Button
-            variant="outline"
+				variant="outline"
+				class="rounded-full"
+				onclick={() => {}}
+			>
+				<Save /> Save
+			</Button>
+			<Button
+				variant="outline"
 				size="icon"
 				class="size-8 rounded-full"
 				onclick={() => {
@@ -84,7 +92,7 @@
 		</div>
 	</div>
 
-	<div id="editor" class="min-h-0 flex-1 w-full rounded-xl overflow-hidden"></div>
+	<div id="editor" class="min-h-0 w-full flex-1 overflow-hidden rounded-xl"></div>
 </div>
 
 <style>
