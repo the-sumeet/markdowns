@@ -124,7 +124,7 @@
 							{:else}
 								<Card.Content class="min-w-0 flex-1"></Card.Content>
 							{/if}
-							<Card.Footer class="flex justify-between">
+							<Card.Footer class="flex justify-between min-h-8">
 								<p class="text-muted-foreground text-sm">
 									{new Date(file.modTime).toLocaleString()}
 								</p>
