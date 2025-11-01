@@ -3,6 +3,28 @@
 	import { Button } from '$lib/components/ui/button';
 	import CircleX from '@lucide/svelte/icons/circle-x';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { Switch } from '$lib/components/ui/switch';
+	import { Label } from '$lib/components/ui/label';
+	import { GetShowHiddenFiles, SetShowHiddenFiles } from '$lib/wailsjs/go/main/App';
+	import { onMount } from 'svelte';
+
+	let showHiddenFiles = $state(false);
+
+	onMount(async () => {
+		try {
+			showHiddenFiles = await GetShowHiddenFiles();
+		} catch (error) {
+			console.error('Error loading ShowHiddenFiles config:', error);
+		}
+	});
+
+	async function toggleShowHiddenFiles() {
+		try {
+			await SetShowHiddenFiles(showHiddenFiles);
+		} catch (error) {
+			console.error('Error saving ShowHiddenFiles config:', error);
+		}
+	}
 </script>
 
 <div class="flex h-full w-full flex-col overflow-hidden p-4">
@@ -32,11 +54,15 @@
 				<Card.Title>Files</Card.Title>
 			</Card.Header>
 			<Card.Content>
-				<p>Card Content</p>
+				<div class="flex items-center space-x-2">
+					<Switch
+						id="show-hidden-files"
+						bind:checked={showHiddenFiles}
+						onCheckedChange={toggleShowHiddenFiles}
+					/>
+					<Label for="show-hidden-files">Show Hidden Files</Label>
+				</div>
 			</Card.Content>
-			<Card.Footer>
-				<p>Card Footer</p>
-			</Card.Footer>
 		</Card.Root>
 	</div>
 </div>
