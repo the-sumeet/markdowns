@@ -2,8 +2,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
-	import Moon from '@lucide/svelte/icons/moon';
-	import Sun from '@lucide/svelte/icons/sun';
+	import Settings from '@lucide/svelte/icons/settings';
 </script>
 
 <div
@@ -12,7 +11,15 @@
 >
 	<!-- <p class="font-yellowtail">Markdowns</p> -->
 
-	<Button  size="icon" class="size-8 rounded-full">
-		<Plus />
-	</Button>
+	<div class="flex flex-1 flex-col">
+		<Button size="icon" class="size-8 rounded-full">
+			<Plus />
+		</Button>
+	</div>
+
+	<div class="flex flex-col">
+		<Button href="/settings" size="icon" variant='outline' class="size-8 rounded-full">
+			<Settings />
+		</Button>
+	</div>
 </div>

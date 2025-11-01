@@ -39,8 +39,20 @@ func (a *App) ListFiles(path string) ([]FileEntry, error) {
 		return nil, fmt.Errorf("failed to read directory %s: %w", dirPath, err)
 	}
 
+	// Get ShowHiddenFiles setting from config
+	showHidden, err := a.GetShowHiddenFiles()
+	if err != nil {
+		// Default to false if config can't be loaded
+		showHidden = false
+	}
+
 	var fileEntries []FileEntry
 	for _, entry := range entries {
+		// Filter hidden files based on config
+		if !showHidden && strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+
 		info, err := entry.Info()
 		if err != nil {
 			fmt.Printf("Error getting info for %s: %v\n", entry.Name(), err)

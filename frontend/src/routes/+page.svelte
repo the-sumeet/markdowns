@@ -84,7 +84,7 @@
 						onmouseleave={() => (hoveredCard = null)}
 					>
 						<Card.Root
-							class="flex w-full cursor-pointer flex-col bg-white/40 backdrop-blur-md transition-shadow duration-200 hover:shadow-md dark:bg-white/10"
+							class="flex w-full cursor-pointer flex-col  transition-shadow duration-200 hover:shadow-md "
 							onclick={() => opne(file)}
 						>
 							<Card.Header>

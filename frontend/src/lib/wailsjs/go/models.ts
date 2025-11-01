@@ -1,5 +1,31 @@
 export namespace main {
 	
+	export class Config {
+	    lastOpenedFile: string;
+	    lastOpenedDirectory: string;
+	    recentFiles: string[];
+	    windowWidth: number;
+	    windowHeight: number;
+	    theme: string;
+	    showHiddenFiles: boolean;
+	    customSettings: Record<string, string>;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.lastOpenedFile = source["lastOpenedFile"];
+	        this.lastOpenedDirectory = source["lastOpenedDirectory"];
+	        this.recentFiles = source["recentFiles"];
+	        this.windowWidth = source["windowWidth"];
+	        this.windowHeight = source["windowHeight"];
+	        this.theme = source["theme"];
+	        this.showHiddenFiles = source["showHiddenFiles"];
+	        this.customSettings = source["customSettings"];
+	    }
+	}
 	export class FileEntry {
 	    name: string;
 	    path: string;
