@@ -131,7 +131,15 @@
 
 								{#if hoveredCard === i}
 									<div transition:fade={{ duration: 200 }}>
-										<Button size="icon" class="size-8 rounded-full">
+										<Button
+											size="icon"
+											class="size-8 rounded-full"
+											onclick={(e) => {
+												e.stopPropagation();
+												// Add your delete logic here
+												console.log('Delete file:', file.path);
+											}}
+										>
 											<Trash2 />
 										</Button>
 									</div>
