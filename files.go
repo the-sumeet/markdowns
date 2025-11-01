@@ -86,12 +86,31 @@ func (a *App) OpenFile(path string) (CurrentFilesState, error) {
 		return CurrentFilesState{}, fmt.Errorf("failed to get file info for %s: %w", path, err)
 	}
 
+	// Load config to update last opened directory/file
+	config, err := LoadConfig()
+	if err != nil {
+		// If config fails to load, continue without saving
+		fmt.Printf("Warning: Could not load config: %v\n", err)
+		config = DefaultConfig()
+	}
+
 	if info.IsDir() {
 		a.currentDir = path
 		// Update window title when directory changes
 		a.UpdateWindowTitleWithCurrentDir()
+		// Save last opened directory to config
+		config.LastOpenedDirectory = path
 	} else {
 		a.currentFile = path
+		// Save last opened file to config
+		config.LastOpenedFile = path
+		// Also add to recent files
+		a.AddRecentFile(path)
+	}
+
+	// Save config
+	if err := SaveConfig(config); err != nil {
+		fmt.Printf("Warning: Could not save config: %v\n", err)
 	}
 
 	return a.GetCurrentFilesState(), nil
@@ -114,6 +133,17 @@ func (a *App) GoUp() (*CurrentFilesState, error) {
 	// Update current directory to parent
 	a.currentDir = parentDir
 	a.UpdateWindowTitleWithCurrentDir()
+
+	// Save last opened directory to config
+	config, err := LoadConfig()
+	if err != nil {
+		fmt.Printf("Warning: Could not load config: %v\n", err)
+		config = DefaultConfig()
+	}
+	config.LastOpenedDirectory = parentDir
+	if err := SaveConfig(config); err != nil {
+		fmt.Printf("Warning: Could not save config: %v\n", err)
+	}
 
 	// Get parent directory info
 	dirInfo, err := os.Stat(parentDir)
@@ -247,6 +277,18 @@ func (a *App) GetContentHash(content string) string {
 func (a *App) ClearCurrentFile() CurrentFilesState {
 	a.currentFile = ""
 	a.currentFileContent = ""
+
+	// Clear last opened file from config
+	config, err := LoadConfig()
+	if err != nil {
+		fmt.Printf("Warning: Could not load config: %v\n", err)
+		config = DefaultConfig()
+	}
+	config.LastOpenedFile = ""
+	if err := SaveConfig(config); err != nil {
+		fmt.Printf("Warning: Could not save config: %v\n", err)
+	}
+
 	return a.GetCurrentFilesState()
 }
 

@@ -28,12 +28,51 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	homeDir, err := os.UserHomeDir()
+
+	// Load config to get last opened directory and file
+	config, err := LoadConfig()
 	if err != nil {
-		fmt.Printf("Error getting user home directory: %v\n", err)
-		a.currentDir = "/" // Fallback to root
+		fmt.Printf("Error loading config: %v\n", err)
+		// Fallback to home directory
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Printf("Error getting user home directory: %v\n", err)
+			a.currentDir = "/" // Fallback to root
+		} else {
+			a.currentDir = homeDir
+		}
 	} else {
-		a.currentDir = homeDir
+		// Use last opened directory if it exists
+		if config.LastOpenedDirectory != "" {
+			// Verify directory still exists
+			if _, err := os.Stat(config.LastOpenedDirectory); err == nil {
+				a.currentDir = config.LastOpenedDirectory
+			} else {
+				// Directory no longer exists, fall back to home
+				homeDir, err := os.UserHomeDir()
+				if err != nil {
+					a.currentDir = "/"
+				} else {
+					a.currentDir = homeDir
+				}
+			}
+		} else {
+			// No last opened directory, use home
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				a.currentDir = "/"
+			} else {
+				a.currentDir = homeDir
+			}
+		}
+
+		// Use last opened file if it exists
+		if config.LastOpenedFile != "" {
+			// Verify file still exists
+			if _, err := os.Stat(config.LastOpenedFile); err == nil {
+				a.currentFile = config.LastOpenedFile
+			}
+		}
 	}
 
 	// Set initial window title
