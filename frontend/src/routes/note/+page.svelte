@@ -8,22 +8,78 @@
 	import '@milkdown/crepe/theme/frame-dark.css';
 	import { Button } from '$lib/components/ui/button';
 	import CircleX from '@lucide/svelte/icons/circle-x';
-	import { ClearCurrentFile } from '$lib/wailsjs/go/main/App';
+	import { ClearCurrentFile, GetContentHash, GetFileContent, SaveFile, PickImageFile } from '$lib/wailsjs/go/main/App';
 	import { main } from '$lib/wailsjs/go/models';
 	import Save from '@lucide/svelte/icons/save';
+	import { editorViewCtx, parserCtx } from '@milkdown/core';
+	import { Slice } from '@milkdown/prose/model';
 
 	let crepe: Crepe | null = $state(null);
 	let editorReady = $state(false);
 	let readingNewFile = $state(false);
 	let saving = $state(false);
-
-	console.log('Current file in note page:', appState.currentFile);
+	let contentHash = $state('');
+	let isDirty = $state(false);
 
 	$effect(() => {
 		if (!appState.currentFile) {
 			goto('/');
 		}
+
+		readingNewFile = true;
+
+		GetFileContent(appState.currentFile!.path)
+			.then(async (data) => {
+				contentHash = await GetContentHash(data);
+				isDirty = false;
+				console.log('Loaded content hash:', contentHash, data);
+				setEditorContent(data);
+			})
+			.catch((error) => {
+				console.error('Error loading file:', error);
+			})
+			.finally(() => {
+				readingNewFile = false;
+			});
 	});
+
+	function setEditorContent(markdown: string) {
+		if (!crepe || !editorReady) return;
+
+		try {
+			crepe.editor.action((ctx) => {
+				const view = ctx.get(editorViewCtx);
+				const parser = ctx.get(parserCtx);
+				const doc = parser(markdown);
+
+				if (!doc) return;
+
+				const state = view.state;
+				view.dispatch(state.tr.replace(0, state.doc.content.size, new Slice(doc.content, 0, 0)));
+			});
+		} catch (error) {
+			console.error('Error setting editor content:', error);
+		}
+	}
+
+	async function saveFile() {
+		if (!appState.currentFile || !crepe || !editorReady) return;
+
+		saving = true;
+		const currentContent = crepe.getMarkdown();
+
+		try {
+			await SaveFile(appState.currentFile.path, currentContent);
+			// Update hash with saved content
+			contentHash = await GetContentHash(currentContent);
+			isDirty = false;
+			console.log('File saved successfully');
+		} catch (error) {
+			console.error('Error saving file:', error);
+		} finally {
+			saving = false;
+		}
+	}
 
 	onMount(() => {
 		crepe = new Crepe({
@@ -32,20 +88,33 @@
 			featureConfigs: {
 				'image-block': {
 					async blockOnUpload(file: File) {
-						console.log('Converting image to base64...');
+						console.log('Image uploaded:', file);
 
 						try {
-							// Convert file to base64 data URI
-							const base64DataUri = await fileToBase64(file);
-							console.log('Image converted to base64');
-							return base64DataUri;
+							// Use Wails Go function to open file dialog
+							const filePath = await PickImageFile();
+							console.log('Selected image path:', filePath);
+							return filePath || '';
 						} catch (error) {
-							console.error('Error converting image to base64:', error);
+							console.error('Error selecting image:', error);
 							return '';
 						}
 					}
 				}
 			}
+		});
+
+		crepe.on((listener) => {
+			listener.markdownUpdated((ctx, markdown, prevMarkdown) => {
+				GetContentHash(markdown).then((hash) => {
+					if (hash !== contentHash && !readingNewFile) {
+						isDirty = true;
+						console.log('dirty', hash, markdown);
+					} else {
+						isDirty = false;
+					}
+				});
+			});
 		});
 
 		crepe.create().then(() => {
@@ -57,7 +126,6 @@
 		// Clean up when component is destroyed
 		editorReady = false;
 		crepe?.destroy();
-		appState.saveFile = undefined;
 	});
 </script>
 
@@ -69,14 +137,12 @@
 		<div class="flex-1">
 			<h1 class=" text-3xl font-extrabold">{appState.currentFile?.name}</h1>
 		</div>
-		<div class="flex gap-1 items-center">
-			<Button
-				variant="outline"
-				class="rounded-full"
-				onclick={() => {}}
-			>
-				<Save /> Save
+		<div class="flex items-center gap-1">
+			{#if isDirty}
+			<Button variant="outline" class="rounded-full" onclick={saveFile} disabled={saving}>
+				<Save /> {saving ? 'Saving...' : 'Save'}
 			</Button>
+			{/if}
 			<Button
 				variant="outline"
 				size="icon"

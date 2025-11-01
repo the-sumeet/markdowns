@@ -26,7 +26,11 @@ export function ListFiles(arg1:string):Promise<Array<main.FileEntry>>;
 
 export function OpenFile(arg1:string):Promise<main.CurrentFilesState>;
 
+export function PickImageFile():Promise<string>;
+
 export function RenameFile(arg1:string,arg2:string):Promise<void>;
+
+export function ResolveImagePath(arg1:string):Promise<string>;
 
 export function SaveFile(arg1:string,arg2:string):Promise<void>;
 

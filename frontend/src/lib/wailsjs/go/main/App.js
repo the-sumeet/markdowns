@@ -50,8 +50,16 @@ export function OpenFile(arg1) {
   return window['go']['main']['App']['OpenFile'](arg1);
 }
 
+export function PickImageFile() {
+  return window['go']['main']['App']['PickImageFile']();
+}
+
 export function RenameFile(arg1, arg2) {
   return window['go']['main']['App']['RenameFile'](arg1, arg2);
+}
+
+export function ResolveImagePath(arg1) {
+  return window['go']['main']['App']['ResolveImagePath'](arg1);
 }
 
 export function SaveFile(arg1, arg2) {
