@@ -17,6 +17,7 @@
 
 	let hoveredCard = $state<number | null>(null);
 	let files: main.FileEntry[] = $state([]);
+	let searchQuery = $state('');
 
 	$effect(() => {
 		if (files) {
@@ -35,6 +36,24 @@
 	let fileContentPreview: {
 		[fileID: string]: string;
 	} = $state({});
+
+	// Computed filtered files based on search query
+	let filteredFiles = $derived(
+		searchQuery.trim() === ''
+			? files
+			: files.filter((file) => {
+					const query = searchQuery.toLowerCase();
+					const nameMatches = file.name.toLowerCase().includes(query);
+
+					// Also search in file content preview for non-directories
+					if (!file.isDirectory && fileContentPreview[file.path]) {
+						const contentMatches = fileContentPreview[file.path].toLowerCase().includes(query);
+						return nameMatches || contentMatches;
+					}
+
+					return nameMatches;
+			  })
+	);
 
 	function opne(file: main.FileEntry) {
 		OpenFile(file.path).then((res: main.CurrentFilesState) => {
@@ -77,7 +96,7 @@
 
 		<div class="flex w-full justify-center">
 			<div class="max-w-8xl flex flex-1 flex-wrap items-stretch">
-				{#each files as file, i}
+				{#each filteredFiles as file, i}
 					<div
 						class="flex w-full p-2 md:w-1/2 lg:w-1/3 xl:w-1/4"
 						onmouseenter={() => (hoveredCard = i)}
@@ -174,7 +193,11 @@
 			</Button>
 
 			<InputGroup.Root class="!h-auto rounded-xl backdrop-blur">
-				<InputGroup.Input class="p-8 !text-xl" placeholder="Search in folder..." />
+				<InputGroup.Input
+					class="p-8 !text-xl"
+					placeholder="Search in folder..."
+					bind:value={searchQuery}
+				/>
 				<InputGroup.Addon align="inline-end">
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>
