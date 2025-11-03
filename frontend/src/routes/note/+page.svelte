@@ -8,11 +8,18 @@
 	import '@milkdown/crepe/theme/frame-dark.css';
 	import { Button } from '$lib/components/ui/button';
 	import CircleX from '@lucide/svelte/icons/circle-x';
-	import { ClearCurrentFile, GetContentHash, GetFileContent, SaveFile, PickImageFile } from '$lib/wailsjs/go/main/App';
+	import {
+		ClearCurrentFile,
+		GetContentHash,
+		GetFileContent,
+		SaveFile,
+		PickImageFile
+	} from '$lib/wailsjs/go/main/App';
 	import { main } from '$lib/wailsjs/go/models';
 	import Save from '@lucide/svelte/icons/save';
 	import { editorViewCtx, parserCtx } from '@milkdown/core';
 	import { Slice } from '@milkdown/prose/model';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
 	let crepe: Crepe | null = $state(null);
 	let editorReady = $state(false);
@@ -20,6 +27,7 @@
 	let saving = $state(false);
 	let contentHash = $state('');
 	let isDirty = $state(false);
+	let showUnsavedDialog = $state(false);
 
 	$effect(() => {
 		if (!appState.currentFile) {
@@ -81,6 +89,30 @@
 		}
 	}
 
+	function handleClose() {
+		if (isDirty) {
+			showUnsavedDialog = true;
+		} else {
+			closeFile();
+		}
+	}
+
+	function closeFile() {
+		ClearCurrentFile().then((res: main.CurrentFilesState) => {
+			updateAppState(appState, res);
+		});
+	}
+
+	async function saveAndClose() {
+		await saveFile();
+		closeFile();
+	}
+
+	function discardAndClose() {
+		showUnsavedDialog = false;
+		closeFile();
+	}
+
 	onMount(() => {
 		crepe = new Crepe({
 			root: document.getElementById('editor'),
@@ -139,19 +171,16 @@
 		</div>
 		<div class="flex items-center gap-1">
 			{#if isDirty}
-			<Button variant="outline" class="rounded-full" onclick={saveFile} disabled={saving}>
-				<Save /> {saving ? 'Saving...' : 'Save'}
-			</Button>
+				<Button variant="outline" class="rounded-full" onclick={saveFile} disabled={saving}>
+					<Save />
+					{saving ? 'Saving...' : 'Save'}
+				</Button>
 			{/if}
 			<Button
 				variant="outline"
 				size="icon"
 				class="size-8 rounded-full"
-				onclick={() => {
-					ClearCurrentFile().then((res: main.CurrentFilesState) => {
-						updateAppState(appState, res);
-					});
-				}}
+				onclick={handleClose}
 			>
 				<CircleX />
 			</Button>
@@ -160,6 +189,21 @@
 
 	<div id="editor" class="min-h-0 w-full flex-1 overflow-hidden rounded-xl"></div>
 </div>
+
+<!-- Close without save confirmation -->
+<Dialog.Root bind:open={showUnsavedDialog}>
+	<Dialog.Content class="bg-card">
+		<Dialog.Header>
+			<Dialog.Title>Your changes will be lost?</Dialog.Title>
+			<Dialog.Description>You've made changes to this file, do you want to discard them?</Dialog.Description>
+		</Dialog.Header>
+		<div class="flex w-full gap-2 justify-end">
+			<Button variant="outline" onclick={() => (showUnsavedDialog = false)}>Cancel</Button>
+			<Button onclick={saveAndClose}>Save and Close</Button>
+			<Button variant="destructive" onclick={discardAndClose}>Discard & Close</Button>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
 
 <style>
 	:global(.milkdown) {
