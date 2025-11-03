@@ -62,9 +62,9 @@
 			appState.contentHash = res.contentHash;
 		});
 
-		if (!file.isDirectory) {
-			goto(`/note`);
-		}
+		// if (!file.isDirectory) {
+		// 	goto(`/note`);
+		// }
 	}
 
 	$effect(() => {
