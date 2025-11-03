@@ -40,11 +40,9 @@
 			.then(async (data) => {
 				contentHash = await GetContentHash(data);
 				isDirty = false;
-				console.log('Loaded content hash:', contentHash, data);
 				setEditorContent(data);
 			})
 			.catch((error) => {
-				console.error('Error loading file:', error);
 			})
 			.finally(() => {
 				readingNewFile = false;
@@ -141,7 +139,6 @@
 				GetContentHash(markdown).then((hash) => {
 					if (hash !== contentHash && !readingNewFile) {
 						isDirty = true;
-						console.log('dirty', hash, markdown);
 					} else {
 						isDirty = false;
 					}
