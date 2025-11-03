@@ -19,6 +19,9 @@
 	let files: main.FileEntry[] = $state([]);
 	let searchQuery = $state('');
 
+	// Check if current directory is root
+	let isAtRoot = $derived(appState.currentDir?.path === '/');
+
 	$effect(() => {
 		if (files) {
 			files.forEach((file) => {
@@ -52,7 +55,7 @@
 					}
 
 					return nameMatches;
-			  })
+				})
 	);
 
 	function opne(file: main.FileEntry) {
@@ -65,6 +68,14 @@
 		// if (!file.isDirectory) {
 		// 	goto(`/note`);
 		// }
+	}
+
+	function goUpDir() {
+		GoUp().then((res: main.CurrentFilesState) => {
+			appState.currentDir = res.currentDir;
+			appState.currentFile = res.currentFile;
+			appState.contentHash = res.contentHash;
+		});
 	}
 
 	$effect(() => {
@@ -96,6 +107,23 @@
 
 		<div class="flex w-full justify-center">
 			<div class="max-w-8xl flex flex-1 flex-wrap items-stretch">
+				{#if !isAtRoot}
+					<div class="flex w-full p-2 md:w-1/2 lg:w-1/3 xl:w-1/4">
+						<Card.Root
+							class="flex w-full cursor-pointer flex-col  transition-shadow duration-200 hover:shadow-md "
+							onclick={goUpDir}
+						>
+							<Card.Header>
+								<Card.Title class="truncate">
+									<FolderUp class=" mr-2 inline-block size-5" />
+									..
+								</Card.Title>
+							</Card.Header>
+							<Card.Content class="min-w-0 flex-1"></Card.Content>
+							<Card.Footer class="flex min-h-8 justify-between"></Card.Footer>
+						</Card.Root>
+					</div>
+				{/if}
 				{#each filteredFiles as file, i}
 					<div
 						class="flex w-full p-2 md:w-1/2 lg:w-1/3 xl:w-1/4"
@@ -143,7 +171,7 @@
 							{:else}
 								<Card.Content class="min-w-0 flex-1"></Card.Content>
 							{/if}
-							<Card.Footer class="flex justify-between min-h-8">
+							<Card.Footer class="flex min-h-8 justify-between">
 								<p class="text-muted-foreground text-sm">
 									{new Date(file.modTime).toLocaleString()}
 								</p>
