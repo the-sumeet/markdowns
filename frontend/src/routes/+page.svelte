@@ -3,7 +3,7 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as InputGroup from '$lib/components/ui/input-group/index.js';
-	import { GetFileContentPreview, GoUp, ListFiles, OpenFile } from '$lib/wailsjs/go/main/App';
+	import { GetFileContentPreview, GoUp, ListFiles, OpenFile, DeleteFile } from '$lib/wailsjs/go/main/App';
 	import type { main } from '$lib/wailsjs/go/models';
 	import MoreHorizontalIcon from '@lucide/svelte/icons/more-horizontal';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -14,10 +14,14 @@
 	import { appState } from '../store.svelte';
 	import FolderUp from '@lucide/svelte/icons/folder-up';
 	import { goto } from '$app/navigation';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
 	let hoveredCard = $state<number | null>(null);
 	let files: main.FileEntry[] = $state([]);
 	let searchQuery = $state('');
+	let showDeleteDialog = $state(false);
+	let fileToDelete = $state<main.FileEntry | null>(null);
+	let deleting = $state(false);
 
 	// Check if current directory is root
 	let isAtRoot = $derived(appState.currentDir?.path === '/');
@@ -76,6 +80,34 @@
 			appState.currentFile = res.currentFile;
 			appState.contentHash = res.contentHash;
 		});
+	}
+
+	function handleDeleteClick(file: main.FileEntry) {
+		fileToDelete = file;
+		showDeleteDialog = true;
+	}
+
+	async function confirmDelete() {
+		if (!fileToDelete) return;
+
+		deleting = true;
+		try {
+			await DeleteFile(fileToDelete.path);
+			// Refresh the file list
+			const updatedFiles = await ListFiles('');
+			files = updatedFiles;
+			showDeleteDialog = false;
+			fileToDelete = null;
+		} catch (error) {
+			console.error('Error deleting file:', error);
+		} finally {
+			deleting = false;
+		}
+	}
+
+	function cancelDelete() {
+		showDeleteDialog = false;
+		fileToDelete = null;
 	}
 
 	$effect(() => {
@@ -183,19 +215,12 @@
 											class="size-8 rounded-full"
 											onclick={(e) => {
 												e.stopPropagation();
-												// Add your delete logic here
-												console.log('Delete file:', file.path);
+												handleDeleteClick(file);
 											}}
 										>
 											<Trash2 />
 										</Button>
 									</div>
-								{:else}
-									<!-- <div class="invisible">
-										<Button size="icon" class="size-8 rounded-full">
-											<Trash2 />
-										</Button>
-									</div> -->
 								{/if}
 							</Card.Footer>
 						</Card.Root>
@@ -246,3 +271,25 @@
 		</div>
 	</div>
 </div>
+
+<!-- Delete confirmation dialog -->
+<Dialog.Root bind:open={showDeleteDialog}>
+	<Dialog.Content class="bg-card backdrop-blur">
+		<Dialog.Header>
+			<Dialog.Title>Delete {fileToDelete?.isDirectory ? 'Folder' : 'File'}?</Dialog.Title>
+			<Dialog.Description>
+				Are you sure you want to delete <strong>{fileToDelete?.name}</strong>?
+				{#if fileToDelete?.isDirectory}
+					This will delete the folder and all its contents.
+				{/if}
+				This action cannot be undone.
+			</Dialog.Description>
+		</Dialog.Header>
+		<div class="flex w-full gap-2 justify-end">
+			<Button variant="outline" onclick={cancelDelete} disabled={deleting}>Cancel</Button>
+			<Button variant="destructive" onclick={confirmDelete} disabled={deleting}>
+				{deleting ? 'Deleting...' : 'Delete'}
+			</Button>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
